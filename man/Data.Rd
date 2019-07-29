@@ -6,7 +6,7 @@
 \alias{ADAE}
 \alias{ADSL}
 \title{Example dataset}
-\format{An object of class \code{data.frame} with 993 rows and 4 columns.}
+\format{An object of class \code{data.frame} with 1014 rows and 4 columns.}
 \usage{
 data(ADAE)
 
@@ -21,7 +21,7 @@ this package.
 \code{USUBJID}: unique subject id \cr
 \code{AEBODSYS}: SoC of the AE \cr
 \code{AEDECOD}: PT of the AE \cr
-\code{TRTEMFL}: indicitator that whether adverse events occurs within 30 days after taking the first dose \cr
+\code{TRTEMFL}: indicitator of whether adverse events occurs within 30 days after taking the first dose \cr
 
 \code{ADSL} is the "subject level analysis dataset", it contains three columns: \cr
 \code{USUBJID}: unique subject id \cr

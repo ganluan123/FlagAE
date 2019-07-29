@@ -4,11 +4,17 @@
 \alias{rawdataprocess}
 \alias{preprocess}
 \alias{preprocess2}
+\alias{preprocess3}
+\alias{preprocess4}
 \title{Raw data process}
 \usage{
 preprocess(adsl, adae, TreatCol, drug)
 
 preprocess2(adsl, adae, TreatCol, drug)
+
+preprocess3(adsl, adae, TreatCol, treatcode)
+
+preprocess4(adsl, adae, TreatCol, treatcode)
 }
 \arguments{
 \item{adsl}{subject level analysis dataset, it is a .sas7bdat file}
@@ -18,6 +24,8 @@ preprocess2(adsl, adae, TreatCol, drug)
 \item{TreatCol}{a string}
 
 \item{drug}{a string}
+
+\item{treatcode}{a vector of strings}
 }
 \value{
 \code{preprocess} returns a dataframe with following columns:\cr
@@ -45,6 +53,16 @@ by creating a new column 'trt' with trt=1 for treatment group and trt=0 for cont
 Also this function only takes the columns related to further analysis. \cr
 \code{preprocess2} first execute function \code{preprocess}
 and reorganize the dataset by adverse events (AE), so that it can be used for further analysis.\cr
+
+\code{preprocess3} is same as \code{preprocess} except that \code{preprocess3} takes 'treatcode' as
+input instead of 'drug'. Like 'drug' in \code{preprocess}, 'treatcode' here is also used to determine
+whether one subject is belong to treatment or control group. If the value under column TreatCol is
+an element of 'treatcode' then this subject belong to treatment group (trt=1) otherwise it belongs
+control group (trt=0). \cr
+
+\code{preprocess4} is same as \code{preprocess2} except it first exectue function \code{preprocess3}. \cr
+
+\code{preprocess3} and \code{preprocess4} provide more flexiblity for processing the raw data.
 }
 \details{
 Parameter "TreatCol" is the column based on which the division is performed,
