@@ -9,10 +9,12 @@
 #' \code{preprocess2} first execute function \code{preprocess}
 #' and reorganize the dataset by adverse events (AE), so that it can be used for further analysis.\cr
 #'
-#' \code{preprocess3} is same as \code{preprocess} except that \code{preprocess3} takes 'treatcode' as
-#' input instead of 'drug'. Like 'drug' in \code{preprocess}, 'treatcode' here is also used to determine
+#' \code{preprocess3} is same as \code{preprocess} except that \code{preprocess3} takes 'treatcode' and 'controlcode' as
+#' input instead of 'drug'. Like 'drug' in \code{preprocess}, 'treatcode' and 'controlcode' here are also used to determine
 #' whether one subject is belong to treatment or control group. If the value under column TreatCol is
-#' an element of 'treatcode' then this subject belong to treatment group (trt=1) otherwise it belongs
+#' an element of 'treatcode' then this subject belongs to treatment group (trt=1), if the value under column TreatCol
+#' is an element of 'controlcode' then this subject belogns to control group (trt=0). For subject with value
+#' under column TreatCol not an element of either 'treatcode' or 'controlcode', subject is removed from the dataset.
 #' control group (trt=0). \cr
 #'
 #' \code{preprocess4} is same as \code{preprocess2} except it first exectue function \code{preprocess3}. \cr
@@ -53,6 +55,7 @@
 #' @param TreatCol a string
 #' @param drug a string
 #' @param treatcode a vector of strings
+#' @param controlcode a vector of strings
 #'
 #' @examples
 #' \dontrun{
@@ -223,18 +226,21 @@ preprocess2<-function (adsl, adae, TreatCol, drug){
 #'
 #' @export
 
-preprocess3<-function(adsl, adae, TreatCol, treatcode){
+preprocess3<-function(adsl, adae, TreatCol, treatcode, controlcode){
   ### this function will take 4 parameters, adsl, adae, TreatCol, treatcode
   ### adsl: subject level analysis dataset, it is a .sas7bdat file
   ### adae: adverse event analysis dataset, it is a .sas7bdat file
   ### TreatCol: a string
   ### treatcode: a vector of strings
+  ### controlcode: a vector of strings
   ### this function will divide the subject(patient) in adsl into two groups
   ### by creating a new column 'trt' with trt=1 for treatment group
   ### and trt=0 for control group
   ### TreatCol is the column based on which the division is performed
-  ### treatcode, a vectors of strings,  is to determine the value of trt,
-  ### if the value under TreatCol is inside treatcode, then trt=1, otherwise trt=0
+  ### treatcode and controlcode, are to determine the value of trt,
+  ### if the value under TreatCol is inside treatcode, then trt=1,
+  ### if the value under TreatCol is inside controlcode, then trt=0
+  ### subjects with value under TreatCol not inside treatcode or controlcode will be discarded
   ### this function will return a dataset containg the following columns:
   ### USUBJID: the unique subject id for all subjects in the trail with or without AE
   ### TreatCol: the column based on which the treatment/control division is performed
@@ -277,11 +283,16 @@ preprocess3<-function(adsl, adae, TreatCol, treatcode){
   ### trt=1, otherwise trt=0
   #Treatment<-adsl1[TreatCol]
   Treatment<-subset(adsl, select=TreatCol)
-  trt<-rep(0, dim(adsl1)[1])
+  trt<-rep(NA, dim(adsl1)[1])
   for (i in 1:dim(adsl1)[1]){
     if (Treatment[i,1] %in% treatcode) trt[i]<-1
+    if (Treatment[i,1] %in% controlcode) trt[i]<-0
   }
   adsl1$trt<-trt
+
+  # remove the subjects that with value of TreatCol not in
+  # treatcode or controlcode
+  adsl1<-adsl1[!is.na(adsl1$trt), ]
 
 
   ### merge adsl1 and ae1 by usubjid
@@ -305,7 +316,7 @@ preprocess3<-function(adsl, adae, TreatCol, treatcode){
 #' @rdname rawdataprocess
 #'
 #' @export
-preprocess4<-function (adsl, adae, TreatCol, treatcode){
+preprocess4<-function (adsl, adae, TreatCol, treatcode, controlcode){
   # this function takes the same parameters as preprocess3
   # and this function do further data preparation based on the result from function preprocess
   # this function will return a dataframe with following columns
@@ -319,7 +330,7 @@ preprocess4<-function (adsl, adae, TreatCol, treatcode){
   # i: integer represents each PT
   # j: order of PT in each SoC
 
-  Cdat0<-preprocess3(adsl=adsl, adae=adae, TreatCol=TreatCol, treatcode=treatcode)
+  Cdat0<-preprocess3(adsl=adsl, adae=adae, TreatCol=TreatCol, treatcode=treatcode, controlcode=controlcode)
   # first we need to split Cdat into two dataset
   # one dataset contains only subjects with AE, named cdat
   # the other dataset contains all unique subjects, named adslid
