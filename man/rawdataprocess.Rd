@@ -12,9 +12,9 @@ preprocess(adsl, adae, TreatCol, drug)
 
 preprocess2(adsl, adae, TreatCol, drug)
 
-preprocess3(adsl, adae, TreatCol, treatcode)
+preprocess3(adsl, adae, TreatCol, treatcode, controlcode)
 
-preprocess4(adsl, adae, TreatCol, treatcode)
+preprocess4(adsl, adae, TreatCol, treatcode, controlcode)
 }
 \arguments{
 \item{adsl}{subject level analysis dataset, it is a .sas7bdat file}
@@ -26,6 +26,8 @@ preprocess4(adsl, adae, TreatCol, treatcode)
 \item{drug}{a string}
 
 \item{treatcode}{a vector of strings}
+
+\item{controlcode}{a vector of strings}
 }
 \value{
 \code{preprocess} returns a dataframe with following columns:\cr
@@ -54,10 +56,12 @@ Also this function only takes the columns related to further analysis. \cr
 \code{preprocess2} first execute function \code{preprocess}
 and reorganize the dataset by adverse events (AE), so that it can be used for further analysis.\cr
 
-\code{preprocess3} is same as \code{preprocess} except that \code{preprocess3} takes 'treatcode' as
-input instead of 'drug'. Like 'drug' in \code{preprocess}, 'treatcode' here is also used to determine
+\code{preprocess3} is same as \code{preprocess} except that \code{preprocess3} takes 'treatcode' and 'controlcode' as
+input instead of 'drug'. Like 'drug' in \code{preprocess}, 'treatcode' and 'controlcode' here are also used to determine
 whether one subject is belong to treatment or control group. If the value under column TreatCol is
-an element of 'treatcode' then this subject belong to treatment group (trt=1) otherwise it belongs
+an element of 'treatcode' then this subject belongs to treatment group (trt=1), if the value under column TreatCol
+is an element of 'controlcode' then this subject belogns to control group (trt=0). For subject with value
+under column TreatCol not an element of either 'treatcode' or 'controlcode', subject is removed from the dataset.
 control group (trt=0). \cr
 
 \code{preprocess4} is same as \code{preprocess2} except it first exectue function \code{preprocess3}. \cr
@@ -75,9 +79,9 @@ experiencing the AE for each AE. It also contains columns, "b", "i", "j" for fur
 \note{
 Both functions only select the patients that at least took one dose of the treatment
 and only select the adverse events occurs within 30 days after taking the first dose. \cr
-\code{preprocess} summarizes the information about AE, and its output can be used
+\code{preprocess} and \code{preprocess3}summarize the information about AE, and its output can be used
 for exploratory analysis. \cr
-The outout of \code{preprocess2} is organized by column b and column j for further analysis.
+The outout of \code{preprocess2} and \code{preprocess4} are organized by column b and column j for further analysis.
 }
 \examples{
 \dontrun{
@@ -85,6 +89,9 @@ data(ADAE)
 data(ADSL)
 preprocess(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
 preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
+preprocess3(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"))
+preprocess4(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"))
+
 }
 
 }

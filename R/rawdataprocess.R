@@ -63,17 +63,17 @@
 #' data(ADSL)
 #' preprocess(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
 #' preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
-#' preprocess3(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"))
-#' preprocess4(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"))
+#' preprocess3(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"), controlcode=c("control", "control2))
+#' preprocess4(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"), controlcode=c("control", "control2))
 #'
 #' }
 #'
 #' @note
 #' Both functions only select the patients that at least took one dose of the treatment
 #' and only select the adverse events occurs within 30 days after taking the first dose. \cr
-#' \code{preprocess} summarizes the information about AE, and its output can be used
+#' \code{preprocess} and \code{preprocess3}summarize the information about AE, and its output can be used
 #' for exploratory analysis. \cr
-#' The outout of \code{preprocess2} is organized by column b and column j for further analysis.
+#' The outout of \code{preprocess2} and \code{preprocess4} are organized by column b and column j for further analysis.
 #' @export
 preprocess<-function(adsl, adae, TreatCol, drug){
   ### this function will take 4 parameters, adsl, adae, TreatCol, drug

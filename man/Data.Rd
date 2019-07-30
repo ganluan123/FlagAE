@@ -25,7 +25,7 @@ this package.
 
 \code{ADSL} is the "subject level analysis dataset", it contains three columns: \cr
 \code{USUBJID}: unique subject id \cr
-\code{TREATMENT}: treatment applied on each subject, subjects are divided into control and treatment group based on this
+\code{TREATMENT}: treatment applied on each subject, subjects are divided into control or treatment group based on this
 \code{SAFFL}: indicitator that patients at least took one dose of the treatment
 }
 \keyword{datasets}
