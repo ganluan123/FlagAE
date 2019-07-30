@@ -63,8 +63,9 @@
 #' data(ADSL)
 #' preprocess(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
 #' preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
-#' preprocess3(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"), controlcode=c("control", "control2))
-#' preprocess4(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"), controlcode=c("control", "control2))
+#' preprocess3(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"), controlcode=c("control", "control2"))
+#' preprocess4(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz", "xyz2"), controlcode=c("control", "control2"))
+#' preprocess4(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", treatcode=c("xyz"), controlcode=c("control"))
 #'
 #' }
 #'
