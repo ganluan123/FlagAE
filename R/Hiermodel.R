@@ -6,10 +6,10 @@
 #' @title Three stages Bayesian Hierarchical Model
 #'
 #' @description  Functions here are to take the orginized data (output from
-#'   \code{preprocess2}) and apply the three stages Bayesian Hierarchical Model.
+#'   \code{preprocess}) and apply the three stages Bayesian Hierarchical Model.
 #'   See details for model description and difference between each function.
 #'
-#' @param aedata output from function \code{\link{preprocess2}}
+#' @param aedata output from function \code{\link{preprocess}}
 #' @param n_burn integer, number of interations without saving posterior samples
 #' @param n_iter integer, number of interations saving posterior samples with every \code{thin}th iteration
 #' @param thin integer, samples are saved for every \code{thin}th iteration
@@ -76,7 +76,7 @@
 #' \dontrun{
 #' data(ADAE)
 #' data(ADSL)
-#' AEdata<-preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
+#' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 #' INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
 #' INITS2<-list(mu.gamma.0=1, tau.gamma.0=1, mu.theta.0=1, tau.theta.0=1, alpha.pi=10, beta.pi=10)
 #' INITS <- list(INITS1,INITS2)
@@ -87,7 +87,7 @@
 #' }
 #'
 #' @seealso
-#' \code{\link{preprocess2}}
+#' \code{\link{preprocess}}
 #'
 #' @references H. Amy Xia , Haijun Ma & Bradley P. Carlin (2011) Bayesian
 #'   Hierarchical Modeling for Detecting Safety Signals in Clinical Trials,
@@ -105,7 +105,7 @@ Hier_history<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain) {
   # the result for Diff, OR, gamma, and theta are ordered by j and then by b
   # for example the result is like Diff.1.1, Diff.2.1, Diff.3.1, Diff.4.1
   # Diff.1.2, Diff.2.2, Diff.3.2 and so on
-  # aedata is the output from function preprocess2
+  # aedata is the output from function preprocess
   # each row of the aedata corresponds to one AE
   # it contains the following columns:
   # Nc: number of total patients in control group
@@ -328,7 +328,7 @@ Hier<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain){
 Hiergetpi<-function(aedata, hierraw){
   # this function is to get the pit and pic from the output of Hier_history
   # the output is used for Loss function
-  # aedata is the output of preprocess2
+  # aedata is the output of preprocess
   # hierraw is the output of Hier_history
   # it will output a list with two elements, pit and pic
   # pit contains the columns of SoC, PT for each AE and also the incidence rate

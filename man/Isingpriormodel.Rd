@@ -17,7 +17,7 @@ Ising(aedata, beta.ab, rho, theta, sim)
 Isinggetpi(aedata, isingraw)
 }
 \arguments{
-\item{aedata}{output from function \code{\link{preprocess2}}}
+\item{aedata}{output from function \code{\link{preprocess}}}
 
 \item{beta.ab}{numeric vector with length of 2, is the prior for beta distribution}
 
@@ -54,7 +54,7 @@ pic (incidence of AE in control group) from the output of \code{Ising_history}. 
 }
 \description{
 Functions here are to take the orginized data (output from
-  \code{preprocess2}) and apply the Bayesian model with Ising latent variables.
+  \code{preprocess}) and apply the Bayesian model with Ising latent variables.
   See details for model description and difference between each function.
 }
 \details{
@@ -84,7 +84,7 @@ the incidences of one AE for treatment and control group, respectively.\cr
 \dontrun{
 data(ADAE)
 data(ADSL)
-AEdata<-preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
+AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 RHO<-rep(1,dim(AEdata)[1])
 THETA<-0.02
 SIM<-c(5000,1000,20)
@@ -102,5 +102,5 @@ McEvoy, Bradley W., Rajesh R. Nandy, and Ram C. Tiwari.
 Biometrics 69.3 (2013): 661-672.
 }
 \seealso{
-\code{\link{preprocess2}}
+\code{\link{preprocess}}
 }

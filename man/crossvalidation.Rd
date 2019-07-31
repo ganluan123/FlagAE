@@ -10,24 +10,21 @@
 \usage{
 Lossfun(aedata, PI)
 
-kfdpar(adsl, adae, TreatCol, drug, k)
+kfdpar(adsl, adae, k)
 
 CVhier(AElist, inits, n_burn, n_iter, thin, n_adapt, n_chain)
 
 CVising(AElist, beta.ab, rho, theta, sim)
 }
 \arguments{
-\item{aedata}{output from function \code{\link{preprocess2}}}
+\item{aedata}{output from function \code{\link{preprocess}}}
 
 \item{PI}{output from function \code{\link{Hiergetpi}} or \code{\link{Isinggetpi}}}
 
-\item{adsl}{subject level analysis dataset, it is a .sas7bdat file}
+\item{adsl}{subject level analysis dataset, it is a .csv file, it has to contain at least two columns, "USUBJID" and "TRTCTR", "TRTCTR"
+is the indicator for treatment and control group. TRTCTR=1 for treatment group and TRTCTR=0 for control group.}
 
-\item{adae}{adverse event analysis dataset, it is a .sas7bdat file}
-
-\item{TreatCol}{a string, used for function \code{\link{preprocess}} and \code{\link{preprocess2}}}
-
-\item{drug}{a string, used for function \code{\link{preprocess}} and \code{\link{preprocess2}}}
+\item{adae}{adverse event analysis dataset, it is a .csv file, it has to contain at least three columns, "USUBJID", "AEBODSYS",and "AEDECOD"}
 
 \item{k}{interger, the number of folds used to split the dataset for cross validation}
 
@@ -77,7 +74,7 @@ N_t and N_c are the number of subjects in treatment and control groups, respecti
 t_{bj} and c_{bj} are the model fitted incidence of an AE with PT j under SOC b in treatment and control groups.
 This formular gives the loss for one interaction/sample, the final loss is the average of loss from all of the interactions/samples.\cr
 
-The loss is calcuated in following way: first the subjects original AE dataset (output of \code{\link{preprocess2}}) is randomly evenly
+The loss is calcuated in following way: first the subjects original AE dataset (output of \code{\link{preprocess}}) is randomly evenly
 divided k independent subparts. For each subpart, use this subpart as the testing dataset and use the rest of the whole dataset as the
 training dataset. Model is trained with the training dataset and then loss is calculated for the testing dataset and training dataset.
 Repeat this for each subpart and take the average of the testing loss and training loss from each subpart as the final loss. \cr
@@ -85,7 +82,7 @@ Repeat this for each subpart and take the average of the testing loss and traini
 \strong{\code{Lossfun}} takes the AE dataset and fitted incidence as parameters and calculate the loss based on the loss function above.\cr
 
 \strong{\code{kfdpar}} first calls function \code{preprocess} to process the data and produce a temporary dataset
-and also calls function \code{preprocess2} to process the data to get the whole AE dataset.
+and also calls function \code{preprocess} to process the data to get the whole AE dataset.
 Then this temporary dataset will be  randomly divided into k equal subparts. For each subpart,
 use this subpart as the testing dataset and use the rest of the whole dataset as the
 training dataset.This function will generate a list with k elements with each element is a also a list
@@ -101,8 +98,8 @@ The output is going to be used for further crossvalidation to calculate loss. \c
 \dontrun{
 data(ADAE)
 data(ADSL)
-AEdata<-preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
-AELIST<-kfdpar(ADSL, ADAE, TreatCol="TREATMENT", drug="xyz", k=5)
+AEdata<-preprocess(adsl=ADSL, adae=ADAE)
+AELIST<-kfdpar(ADSL, ADAE, k=5)
 
 # Bayesian Hierarchical Model
 INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
@@ -130,6 +127,6 @@ LOSSISING$testloss # test loss
 
 }
 \seealso{
-\code{\link{preprocess}}, \code{\link{preprocess2}}, \code{\link{Hier}}, \code{\link{Ising}}, \code{\link{Isinggetpi}},
+\code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}, \code{\link{Isinggetpi}},
 \code{\link{Hiergetpi}}
 }

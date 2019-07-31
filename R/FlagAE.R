@@ -12,7 +12,7 @@
 #'
 #' @section Functions in this package:
 #'
-#' Raw data process: \code{\link{preprocess}}, \code{\link{preprocess2}}\cr
+#' Raw data process: \code{\link{preprocess}}
 #' Plot based on Fisher exact test: \code{\link{gci}}, \code{\link{gci2}} \cr
 #' Three stages Bayesian Hierarchical Model: \code{\link{Hier_history}}, \code{\link{sum_Hier}}, \code{\link{Hier}}, \code{\link{Hiergetpi}} \cr
 #' Bayesian Model with Ising Latent Variables: \code{\link{Ising_history}}, \code{\link{sum_Ising}}, \code{\link{Ising}}, \code{\link{Isinggetpi}} \cr

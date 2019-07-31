@@ -17,7 +17,7 @@ Hier(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain)
 Hiergetpi(aedata, hierraw)
 }
 \arguments{
-\item{aedata}{output from function \code{\link{preprocess2}}}
+\item{aedata}{output from function \code{\link{preprocess}}}
 
 \item{inits}{a list, with length equal to n_chain, each element of \code{inits} is
 also a list contains initials for each chain; it needs to provide initials for the following
@@ -53,7 +53,7 @@ pic (incidence of AE in control group) from the output of \code{Hier_history}.\c
 }
 \description{
 Functions here are to take the orginized data (output from
-  \code{preprocess2}) and apply the three stages Bayesian Hierarchical Model.
+  \code{preprocess}) and apply the three stages Bayesian Hierarchical Model.
   See details for model description and difference between each function.
 }
 \details{
@@ -93,7 +93,7 @@ Functions here are to take the orginized data (output from
 \dontrun{
 data(ADAE)
 data(ADSL)
-AEdata<-preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
+AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
 INITS2<-list(mu.gamma.0=1, tau.gamma.0=1, mu.theta.0=1, tau.theta.0=1, alpha.pi=10, beta.pi=10)
 INITS <- list(INITS1,INITS2)
@@ -111,5 +111,5 @@ H. Amy Xia , Haijun Ma & Bradley P. Carlin (2011) Bayesian
   10.1080/10543406.2010.520181)
 }
 \seealso{
-\code{\link{preprocess2}}
+\code{\link{preprocess}}
 }

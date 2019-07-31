@@ -22,13 +22,13 @@
 #' default is "risk difference"
 #'
 #' @seealso
-#' \code{\link{preprocess2}}, \code{\link{Hier}}, \code{\link{Ising}}
+#' \code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}
 #'
 #' @examples
 #' \dontrun{
 #' data(ADAE)
 #' data(ADSL)
-#' AEdata<-preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
+#' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 #'
 #' # run the Hierarchical model
 #' INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
@@ -62,7 +62,7 @@ gci3<-function(aedata, ptnum=10, conf.level=0.95){
   # then the PT of AEs with the highest ptnum incidence rate difference between treatment and control
   # group were returned
 
-  # The input aedata is the output from preprocess2,
+  # The input aedata is the output from preprocess,
   # it has the follwing fixed variable names
   # the data includes AE, not total subjects
   # Nc: number of control subjects
@@ -99,7 +99,7 @@ gci3<-function(aedata, ptnum=10, conf.level=0.95){
 HIPLOT<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" ){
   # hierdata is the result from function Hier
   # isingdata is the result from function Ising
-  # aedata is the result from function preprocess2
+  # aedata is the result from function preprocess
   # PTNUM is the number of AE we want to plot
   # param is the summary statistic we use to select the AE, it can be either "risk difference" or "odds ratio"
   # for this function, it will first select the top PTNUM number of AE based on the summary statistic param from the selected method

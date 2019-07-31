@@ -6,10 +6,10 @@
 #' @title Bayesian Model with Ising Latent Variables
 #'
 #' @description Functions here are to take the orginized data (output from
-#'   \code{preprocess2}) and apply the Bayesian model with Ising latent variables.
+#'   \code{preprocess}) and apply the Bayesian model with Ising latent variables.
 #'   See details for model description and difference between each function.
 #'
-#' @param aedata output from function \code{\link{preprocess2}}
+#' @param aedata output from function \code{\link{preprocess}}
 #' @param beta.ab numeric vector with length of 2, is the prior for beta distribution
 #' @param rho numeric vector with length equals to the number of rows of data frame aedata
 #' @param theta numeric, \code{rho} and \code{theta} are parameters for Ising prior
@@ -64,7 +64,7 @@
 #' \dontrun{
 #' data(ADAE)
 #' data(ADSL)
-#' AEdata<-preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
+#' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 #' RHO<-rep(1,dim(AEdata)[1])
 #' THETA<-0.02
 #' SIM<-c(5000,1000,20)
@@ -76,7 +76,7 @@
 #' }
 #'
 #' @seealso
-#' \code{\link{preprocess2}}
+#' \code{\link{preprocess}}
 #'
 #' @references
 #' McEvoy, Bradley W., Rajesh R. Nandy, and Ram C. Tiwari.
@@ -342,7 +342,7 @@ Ising <- function (aedata, beta.ab, rho, theta, sim) {
 Isinggetpi<-function (aedata, isingraw){
   # this function is to get the pit and pic from the output of Ising_history
   # the output is used for Loss function
-  # aedata is the output of preprocess2
+  # aedata is the output of preprocess
   # isingraw is the output of Ising_history
   # it will output a list with two elements, pit and pic
   # pit contains the columns of SoC, PT for each AE and also the incidence rate

@@ -8,23 +8,20 @@
 \usage{
 gci(aedata, ptnum = 10, conf.level = 0.95)
 
-gci2(adsl, adae, TreatCol, drug, ptnum = 10, conf.level = 0.95)
+gci2(adsl, adae, ptnum = 10, conf.level = 0.95)
 }
 \arguments{
-\item{aedata}{output from function \code{\link{preprocess2}}}
+\item{aedata}{output from function \code{\link{preprocess}}}
 
 \item{ptnum}{positive integer, number of AEs to be plotted, default is 10}
 
 \item{conf.level}{number between 0 and 1, confidence level for constructing
 confidence interval, default is 0.95}
 
-\item{adsl}{subject level analysis dataset, it is a .sas7bdat file}
+\item{adsl}{subject level analysis dataset, it is a .csv file, it has to contain at least two columns, "USUBJID" and "TRTCTR", "TRTCTR"
+is the indicator for treatment and control group. TRTCTR=1 for treatment group and TRTCTR=0 for control group.}
 
-\item{adae}{adverse event analysis dataset, it is a .sas7bdat file}
-
-\item{TreatCol}{a string}
-
-\item{drug}{a string}
+\item{adae}{adverse event analysis dataset, it is a .csv file, it has to contain at least three columns, "USUBJID", "AEBODSYS",and "AEDECOD"}
 }
 \description{
 Both functions \code{gci} and \code{gci2} plot the top AEs with
@@ -44,13 +41,13 @@ input.
 \dontrun{
 data(ADAE)
 data(ADSL)
-AEdata<-preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
+AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 gci(aedata=AEdata)
 gci(aedata=AEdata, ptnum=15, conf.level=0.9)
-gci2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
-gci2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz", ptnum=15, conf.level=0.9)
+gci2(adsl=ADSL, adae=ADAE)
+gci2(adsl=ADSL, adae=ADAE, ptnum=15, conf.level=0.9)
 }
 }
 \seealso{
-\code{\link{preprocess2}}
+\code{\link{preprocess}}
 }

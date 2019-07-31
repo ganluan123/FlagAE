@@ -12,12 +12,13 @@
 #' \code{USUBJID}: unique subject id \cr
 #' \code{AEBODSYS}: SoC of the AE \cr
 #' \code{AEDECOD}: PT of the AE \cr
-#' \code{TRTEMFL}: indicitator of whether adverse events occurs within 30 days after taking the first dose \cr
+#'
 #'
 #' \code{ADSL} is the "subject level analysis dataset", it contains three columns: \cr
 #' \code{USUBJID}: unique subject id \cr
 #' \code{TREATMENT}: treatment applied on each subject, subjects are divided into control or treatment group based on this
-#' \code{SAFFL}: indicitator that patients at least took one dose of the treatment
+#' \code{TRTCTR}: indicitator for treatment group (TRTCTR=1, TREATMENT = "xyz" or 'xyz2') or
+#' control group (TRTCTR=0, TREATMENT='control' or 'control2')
 #'
 #' @docType data
 #'

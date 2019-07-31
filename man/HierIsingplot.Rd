@@ -12,7 +12,7 @@ HIPLOT(hierdata, isingdata, aedata, ptnum = 10,
   param = "risk difference")
 }
 \arguments{
-\item{aedata}{output from function \code{\link{preprocess2}}}
+\item{aedata}{output from function \code{\link{preprocess}}}
 
 \item{ptnum}{positive integer, number of AEs to be selected or plotted, default is 10}
 
@@ -44,7 +44,7 @@ incidence difference (function \code{gci3}). \cr
 \dontrun{
 data(ADAE)
 data(ADSL)
-AEdata<-preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
+AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 
 # run the Hierarchical model
 INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
@@ -68,5 +68,5 @@ HIPLOT(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="o
 
 }
 \seealso{
-\code{\link{preprocess2}}, \code{\link{Hier}}, \code{\link{Ising}}
+\code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}
 }

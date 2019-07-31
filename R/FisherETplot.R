@@ -17,23 +17,24 @@
 #' \code{preprocess} as the input, while \code{gci2} takes the raw data as the
 #' input.
 #'
-#' @param aedata output from function \code{\link{preprocess2}}
+#' @inheritParams preprocess
+#' @param aedata output from function \code{\link{preprocess}}
 #' @param ptnum positive integer, number of AEs to be plotted, default is 10
 #' @param conf.level number between 0 and 1, confidence level for constructing
 #'   confidence interval, default is 0.95
-#' @inheritParams preprocess2
+#'
 #'
 #' @examples
 #' \dontrun{
 #' data(ADAE)
 #' data(ADSL)
-#' AEdata<-preprocess2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
+#' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 #' gci(aedata=AEdata)
 #' gci(aedata=AEdata, ptnum=15, conf.level=0.9)
-#' gci2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz")
-#' gci2(adsl=ADSL, adae=ADAE, TreatCol="TREATMENT", drug="xyz", ptnum=15, conf.level=0.9)
+#' gci2(adsl=ADSL, adae=ADAE)
+#' gci2(adsl=ADSL, adae=ADAE, ptnum=15, conf.level=0.9)
 #' }
-#' @seealso \code{\link{preprocess2}}
+#' @seealso \code{\link{preprocess}}
 #'
 #' @export
 gci <- function(aedata, ptnum=10, conf.level=0.95) {
@@ -45,7 +46,7 @@ gci <- function(aedata, ptnum=10, conf.level=0.95) {
   # group were plotted with incidence and conf. interval shown pt from the same
   # SoC group were plotted in the same color.
 
-  # aedata: the output from function preprocess2
+  # aedata: the output from function preprocess
   # ptnum: the number of top AEs we want to plot, with default be 10
   # conf.level: confident level used for fisher exact test with default be 0.95
 
@@ -103,12 +104,12 @@ gci <- function(aedata, ptnum=10, conf.level=0.95) {
 
 #' @rdname FisherETplot
 #' @export
-gci2<-function(adsl, adae, TreatCol, drug, ptnum=10, conf.level=0.95 ){
+gci2<-function(adsl, adae, ptnum=10, conf.level=0.95 ){
 
-  # this function takes the same parameters as in preprocess and preprocess2
+  # this function takes the same parameters as in preprocess and preprocess
   # and also parameters from fucntion gci
   # user can use the raw data and directly plot out the AE as in gci
-  df<- preprocess2(adsl=adsl, adae=adae, TreatCol=TreatCol, drug=drug)
+  df<- preprocess(adsl=adsl, adae=adae)
 
   gci(aedata=df, ptnum=ptnum, conf.level=conf.level)
 }
