@@ -15,10 +15,8 @@
 #' @param thin integer, samples are saved for every \code{thin}th iteration
 #' @param n_adapt integer, number of adaptations
 #' @param n_chain number of MCMC chains
-#' @param inits a list, with length equal to n_chain, each element of \code{inits} is
-#' also a list contains initials for each chain; it needs to provide initials for the following
-#' variables: mu.gamma.0, tau.gamma.0, mu.theta.0, tau.theta.0, alpha.pi, beta.pi
-#' @param hierraw output from function \code{link{Hier_history}}
+#' @param alpha.gamma/beta.gamma/alpha.theta/beta.theta/mu.gamma.0.0/tau.gamma.0.0/alpha.gamma.0.0/beta.gamma.0.0/lambda.alpha/lambda.beta/mu.theta.0.0/tau.theta.0.0/alpha.theta.0.0/beta.theta.0.0 hyperparameters for prior distribution,
+#' see the reference for the meaning of each parameters
 #'
 #'
 #' @details \strong{Model}: \cr Here the 3-stage hierarchical bayesian model was
@@ -77,12 +75,14 @@
 #' data(ADAE)
 #' data(ADSL)
 #' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
-#' INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
-#' INITS2<-list(mu.gamma.0=1, tau.gamma.0=1, mu.theta.0=1, tau.theta.0=1, alpha.pi=10, beta.pi=10)
-#' INITS <- list(INITS1,INITS2)
-#' HIERRAW<-Hier_history(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
-#' HIERRAW2<-Hier_history(aedata=AEdata, inits=INITS1, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1)
-#' HIERDATA<-Hier(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+#' HIERRAW<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+#' HIERRAW2<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1)
+#' # you can specify the hyperparameter as shown below
+#' HIERRAW3<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1,
+#' alpha.gamma=5, beta.gamma=1, alpha.theta=3, beta.theta=1, mu.gamma.0.0=0.1, tau.gamma.0.0=10, alpha.gamma.0.0=5,
+#' beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0.1, tau.theta.0.0=10,alpha.theta.0.0=3, beta.theta.0.0=1)
+#'
+#' HIERDATA<-Hier(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 #' HIERPI<-Hiergetpi(aedata=AEdata, hierraw=HIERRAW)
 #' }
 #'
@@ -96,7 +96,10 @@
 #'
 #' @export
 
-Hier_history<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain) {
+Hier_history<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma=3, beta.gamma=1,
+                        alpha.theta=3, beta.theta=1, mu.gamma.0.0=0, tau.gamma.0.0=10, alpha.gamma.0.0=3,
+                        beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0, tau.theta.0.0=10,
+                        alpha.theta.0.0=3, beta.theta.0.0=1) {
 
   # This function takes formatted Binomial data and output
   # Gibbs sample of the defined parameters
@@ -121,8 +124,8 @@ Hier_history<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain) {
   # n here is given by thin
   # n_adapt: number of adaptations
   # n_chain: number of MCMC chains
-  # inits is a list with length equal to n_chain
-  # each element of inits is one set of inits for each chain
+  # the rest input are for hyperparameters for the prior distribution
+
 
   #############################################
   ## M1b: Binomial model with mixture prior ###
@@ -131,69 +134,75 @@ Hier_history<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain) {
   # create the model
 
   model.binom<-"model{
-    for (i in 1:Nae) {
-      X[i] ~ dbin(c[b[i], j[i]], Nc)
-      Y[i] ~ dbin(t[b[i], j[i]], Nt)
+  for (i in 1:Nae) {
+  X[i] ~ dbin(c[b[i], j[i]], Nc)
+  Y[i] ~ dbin(t[b[i], j[i]], Nt)
 
-      logit(c[b[i], j[i]]) <- gamma[b[i], j[i]]
-      logit(t[b[i], j[i]]) <- gamma[b[i], j[i]] + theta[b[i], j[i]]
+  logit(c[b[i], j[i]]) <- gamma[b[i], j[i]]
+  logit(t[b[i], j[i]]) <- gamma[b[i], j[i]] + theta[b[i], j[i]]
 
-      gamma[b[i], j[i]] ~ dnorm(mu.gamma[b[i]], tau.gamma[b[i]])
-      p0[i] ~ dbern(pi[b[i]] ) # prob of point mass
-      theta1[b[i], j[i]] ~ dnorm(mu.theta[b[i]], tau.theta[b[i]])
+  gamma[b[i], j[i]] ~ dnorm(mu.gamma[b[i]], tau.gamma[b[i]])
+  p0[i] ~ dbern(pi[b[i]] ) # prob of point mass
+  theta1[b[i], j[i]] ~ dnorm(mu.theta[b[i]], tau.theta[b[i]])
 
-      # theta=0 w.p. pi[i] and theta=theta1 w.p. 1-pi[i]
+  # theta=0 w.p. pi[i] and theta=theta1 w.p. 1-pi[i]
 
-      theta[b[i], j[i]] <- (1- p0[i]) * theta1[b[i], j[i]]
+  theta[b[i], j[i]] <- (1- p0[i]) * theta1[b[i], j[i]]
 
-      OR[b[i],j[i]] <- exp(theta[b[i],j[i]] )
-      # ORpv2[b[i], j[i]] <- step(OR[b[i],j[i]] - 2 )  # OR >= 2
+  OR[b[i],j[i]] <- exp(theta[b[i],j[i]] )
+  # ORpv2[b[i], j[i]] <- step(OR[b[i],j[i]] - 2 )  # OR >= 2
 
-      # ORpv2[b[i], j[i]] <- step(OR[b[i],j[i]] -1.2 ) # OR >= 1.2
+  # ORpv2[b[i], j[i]] <- step(OR[b[i],j[i]] -1.2 ) # OR >= 1.2
 
-      # ORpv[b[i], j[i]] <- 1- step(-OR[b[i],j[i]]) # OR >1
+  # ORpv[b[i], j[i]] <- 1- step(-OR[b[i],j[i]]) # OR >1
 
-      # RD[b[i], j[i]] <- t[b[i], j[i]] - c[b[i], j[i]]
-      # RDpv[b[i], j[i]] <- 1 - step(c[b[i], j[i]] - t[b[i], j[i]])
-      # RD>0
-      # RDpv2[b[i], j[i]] <- step(t[b[i], j[i]] - c[b[i], j[i]]- 0.02) # RD>=2%
-      # RDpv5[b[i], j[i]] <- step(t[b[i], j[i]] - c[b[i], j[i]]- 0.05) # RD>=5%
+  # RD[b[i], j[i]] <- t[b[i], j[i]] - c[b[i], j[i]]
+  # RDpv[b[i], j[i]] <- 1 - step(c[b[i], j[i]] - t[b[i], j[i]])
+  # RD>0
+  # RDpv2[b[i], j[i]] <- step(t[b[i], j[i]] - c[b[i], j[i]]- 0.02) # RD>=2%
+  # RDpv5[b[i], j[i]] <- step(t[b[i], j[i]] - c[b[i], j[i]]- 0.05) # RD>=5%
 
-      D[i] <- X[i]*log(c[b[i], j[i]]) + (Nc-X[i])*log(1-c[b[i], j[i]]) + Y[i]*log(t[b[i], j[i]]) + (Nt-Y[i])*log(1-t[b[i],j[i]])
+  D[i] <- X[i]*log(c[b[i], j[i]]) + (Nc-X[i])*log(1-c[b[i], j[i]]) + Y[i]*log(t[b[i], j[i]]) + (Nt-Y[i])*log(1-t[b[i],j[i]])
 
 
-      Diff[b[i], j[i]] <- t[b[i], j[i]] - c[b[i], j[i]]
-    }
+  Diff[b[i], j[i]] <- t[b[i], j[i]] - c[b[i], j[i]]
+  }
 
-    Dbar <- -2* sum(D[]) # -2logL without normalizing constant
-    # SOC level parameters
+  Dbar <- -2* sum(D[]) # -2logL without normalizing constant
+  # SOC level parameters
 
-    for(k in 1:B){
-      pi[k] ~ dbeta(alpha.pi, beta.pi)
-      mu.gamma[k] ~ dnorm(mu.gamma.0, tau.gamma.0)
-      tau.gamma[k] ~ dgamma(3,1)
-      mu.theta[k] ~ dnorm(mu.theta.0, tau.theta.0)
-      tau.theta[k] ~ dgamma(3,1)
-    }
+  for(k in 1:B){
+  pi[k] ~ dbeta(alpha.pi, beta.pi)
+  mu.gamma[k] ~ dnorm(mu.gamma.0, tau.gamma.0)
+  tau.gamma[k] ~ dgamma(alpha.gamma,beta.gamma)
+  mu.theta[k] ~ dnorm(mu.theta.0, tau.theta.0)
+  tau.theta[k] ~ dgamma(alpha.theta,beta.theta)
+  }
 
-    # hyperpriors for gamma?s;
-    mu.gamma.0 ~ dnorm(0, 0.1)
-    tau.gamma.0 ~ dgamma(3,1)
+  # hyperpriors for gammas;
+  mu.gamma.0 ~ dnorm(mu.gamma.0.0, 1/tau.gamma.0.0)
+  tau.gamma.0 ~ dgamma(alpha.gamma.0.0, beta.gamma.0.0)
 
-    # hyperpriors for theta?s;
-    mu.theta.0 ~ dnorm(0, 0.1)
-    tau.theta.0 ~ dgamma(3,1)
+  # hyperpriors for thetas;
+  mu.theta.0 ~ dnorm(mu.theta.0.0, 1/tau.theta.0.0)
+  tau.theta.0 ~ dgamma(alpha.theta.0.0,beta.theta.0.0)
 
-    # hyperpriors for pi?s;
-    alpha.pi ~ dexp(0.1)I(1,)
-    beta.pi ~ dexp(0.1)I(1,)
-  }"
+  # hyperpriors for pi?s;
+  alpha.pi ~ dexp(lambda.alpha)I(1,)
+  beta.pi ~ dexp(lambda.beta)I(1,)
+}"
 
 
   param<-c("OR", "Diff", "gamma", "theta")
 
   data <- list(Nae = nrow(aedata), Nc = aedata$Nc[1], Nt = aedata$Nt[1], B = max(aedata$b),
-               b = aedata$b, j = aedata$j, Y = aedata$AEt, X = aedata$AEc)
+               b = aedata$b, j = aedata$j, Y = aedata$AEt, X = aedata$AEc,
+               alpha.gamma=alpha.gamma, beta.gamma=beta.gamma,
+               alpha.theta=alpha.theta, beta.theta=beta.theta, mu.gamma.0.0=mu.gamma.0.0, tau.gamma.0.0=tau.gamma.0.0,
+               alpha.gamma.0.0=alpha.gamma.0.0,
+               beta.gamma.0.0=beta.gamma.0.0, lambda.alpha=lambda.alpha, lambda.beta=lambda.beta,
+               mu.theta.0.0=mu.theta.0.0, tau.theta.0.0=tau.theta.0.0,
+               alpha.theta.0.0=alpha.theta.0.0, beta.theta.0.0=beta.theta.0.0)
 
 
   # we use parallel computing for n_chain>1
@@ -210,7 +219,7 @@ Hier_history<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain) {
       library(mcmcplots)
       library(rjags)
       library(R2jags)
-      temp.fit <- jags.model(textConnection(model.binom),data=data,inits=inits[m],n.chains=1, n.adapt=n_adapt,quiet=TRUE)
+      temp.fit <- jags.model(textConnection(model.binom), data=data, n.chains=1, n.adapt=n_adapt, quiet=TRUE)
       update(temp.fit, n.iter=n_burn)
 
       # summary of posterior samples
@@ -231,7 +240,7 @@ Hier_history<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain) {
     library(mcmcplots)
     library(rjags)
     library(R2jags)
-    temp.fit <- jags.model(textConnection(model.binom),data=data,inits=inits,n.chains=1, n.adapt=n_adapt,quiet=TRUE)
+    temp.fit <- jags.model(textConnection(model.binom),data=data,n.chains=1, n.adapt=n_adapt,quiet=TRUE)
     update(temp.fit, n.iter=n_burn)
 
     # summary of posterior samples
@@ -241,8 +250,7 @@ Hier_history<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain) {
   }
 
   return(Final.est)
-}
-
+  }
 
 #########################################################################################################
 #########################################################################################################
@@ -270,7 +278,11 @@ sum_Hier <- function(hierraw){
 
 #' @rdname Hiermodel
 #' @export
-Hier<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain){
+Hier<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma=3, beta.gamma=1,
+                alpha.theta=3, beta.theta=1, mu.gamma.0.0=0, tau.gamma.0.0=10, alpha.gamma.0.0=3,
+                beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0, tau.theta.0.0=10,
+                alpha.theta.0.0=3, beta.theta.0.0=1){
+
   # this function take the same input as Hier_history
   # this function will get the summary statistics for output from Hier_history
   # it will give the summary statistics for each AE and combine with raw data
@@ -280,7 +292,11 @@ Hier<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain){
   # the other columns including:
   # SoC, PT, Nt, Nc, AEt, AEc
 
-  oest<-Hier_history(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain)
+  oest<-Hier_history(aedata=aedata, n_burn=n_burn, n_iter=n_iter, thin=thin, n_adapt=n_adapt, n_chain=n_chain, alpha.gamma=alpha.gamma, beta.gamma=beta.gamma,
+                     alpha.theta=alpha.theta, beta.theta=beta.theta, mu.gamma.0.0=mu.gamma.0.0, tau.gamma.0.0=tau.gamma.0.0,
+                     alpha.gamma.0.0=alpha.gamma.0.0, beta.gamma.0.0=beta.gamma.0.0, lambda.alpha=lambda.alpha,
+                     lambda.beta=lambda.beta, mu.theta.0.0=mu.theta.0.0, tau.theta.0.0=tau.theta.0.0,
+                     alpha.theta.0.0=alpha.theta.0.0, beta.theta.0.0=beta.theta.0.0)
 
   # Get the mean, standard devision, quantile of 2.5%, 25%, 50%, 75%, and 97.5% for the parameters interested
   # get the summary for parameter Dbar, Diff, and OR

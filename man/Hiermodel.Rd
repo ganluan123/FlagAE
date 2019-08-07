@@ -8,20 +8,26 @@
 \alias{Hiergetpi}
 \title{Three stages Bayesian Hierarchical Model}
 \usage{
-Hier_history(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain)
+Hier_history(aedata, n_burn, n_iter, thin, n_adapt, n_chain,
+  alpha.gamma = 3, beta.gamma = 1, alpha.theta = 3, beta.theta = 1,
+  mu.gamma.0.0 = 0, tau.gamma.0.0 = 10, alpha.gamma.0.0 = 3,
+  beta.gamma.0.0 = 1, lambda.alpha = 0.1, lambda.beta = 0.1,
+  mu.theta.0.0 = 0, tau.theta.0.0 = 10, alpha.theta.0.0 = 3,
+  beta.theta.0.0 = 1)
 
 sum_Hier(hierraw)
 
-Hier(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain)
+Hier(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma = 3,
+  beta.gamma = 1, alpha.theta = 3, beta.theta = 1,
+  mu.gamma.0.0 = 0, tau.gamma.0.0 = 10, alpha.gamma.0.0 = 3,
+  beta.gamma.0.0 = 1, lambda.alpha = 0.1, lambda.beta = 0.1,
+  mu.theta.0.0 = 0, tau.theta.0.0 = 10, alpha.theta.0.0 = 3,
+  beta.theta.0.0 = 1)
 
 Hiergetpi(aedata, hierraw)
 }
 \arguments{
 \item{aedata}{output from function \code{\link{preprocess}}}
-
-\item{inits}{a list, with length equal to n_chain, each element of \code{inits} is
-also a list contains initials for each chain; it needs to provide initials for the following
-variables: mu.gamma.0, tau.gamma.0, mu.theta.0, tau.theta.0, alpha.pi, beta.pi}
 
 \item{n_burn}{integer, number of interations without saving posterior samples}
 
@@ -33,7 +39,8 @@ variables: mu.gamma.0, tau.gamma.0, mu.theta.0, tau.theta.0, alpha.pi, beta.pi}
 
 \item{n_chain}{number of MCMC chains}
 
-\item{hierraw}{output from function \code{link{Hier_history}}}
+\item{alpha.gamma/beta.gamma/alpha.theta/beta.theta/mu.gamma.0.0/tau.gamma.0.0/alpha.gamma.0.0/beta.gamma.0.0/lambda.alpha/lambda.beta/mu.theta.0.0/tau.theta.0.0/alpha.theta.0.0/beta.theta.0.0}{hyperparameters for prior distribution,
+see the reference for the meaning of each parameters}
 }
 \value{
 \strong{\code{Hier_history}}\cr
@@ -94,12 +101,14 @@ Functions here are to take the orginized data (output from
 data(ADAE)
 data(ADSL)
 AEdata<-preprocess(adsl=ADSL, adae=ADAE)
-INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
-INITS2<-list(mu.gamma.0=1, tau.gamma.0=1, mu.theta.0=1, tau.theta.0=1, alpha.pi=10, beta.pi=10)
-INITS <- list(INITS1,INITS2)
-HIERRAW<-Hier_history(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
-HIERRAW2<-Hier_history(aedata=AEdata, inits=INITS1, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1)
-HIERDATA<-Hier(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+HIERRAW<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+HIERRAW2<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1)
+# you can specify the hyperparameter as shown below
+HIERRAW3<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1,
+alpha.gamma=5, beta.gamma=1, alpha.theta=3, beta.theta=1, mu.gamma.0.0=0.1, tau.gamma.0.0=10, alpha.gamma.0.0=5,
+beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0.1, tau.theta.0.0=10,alpha.theta.0.0=3, beta.theta.0.0=1)
+
+HIERDATA<-Hier(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 HIERPI<-Hiergetpi(aedata=AEdata, hierraw=HIERRAW)
 }
 

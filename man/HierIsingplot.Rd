@@ -2,38 +2,44 @@
 % Please edit documentation in R/HierIsingplot.R
 \name{HierIsingplot}
 \alias{HierIsingplot}
-\alias{gci3}
 \alias{HIPLOT}
+\alias{HItable}
 \title{Plot for two Bayesian models}
 \usage{
-gci3(aedata, ptnum = 10, conf.level = 0.95)
-
 HIPLOT(hierdata, isingdata, aedata, ptnum = 10,
+  param = "risk difference")
+
+HItable(hierdata, isingdata, aedata, ptnum = 10,
   param = "risk difference")
 }
 \arguments{
-\item{ptnum}{positive integer, number of AEs to be selected or plotted, default is 10}
-
 \item{hierdata}{output from function \code{\link{Hier}}}
 
 \item{isingdata}{output from function \code{\link{Ising}}}
 
+\item{ptnum}{positive integer, number of AEs to be selected or plotted, default is 10}
+
 \item{param}{a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 default is "risk difference"}
 }
+\value{
+\code{HIPLOT} returns a plot for the top \code{ptnum} (an integer) AE based on the selected statistics (either "odds ratio" or "risk difference"). Mean, 2.5% quantile,
+97.5% quantile of the selected statistics of these AE from both two models were plotted.
+\cr
+\code{HItable} returns a table for the detailed information for AE plotted in \code{HIPLOT}. It contains a new column, "rank_diff_mean" or "rank_OR_mean"
+(based on the \code{param}), besides the columns of output from \code{\link{Hier}} or \code{\link{Ising}}. This new column is the rank of "Diff_mean" or "OR_mean"
+of the AE in each method.
+}
 \description{
 These two functions are for plotting the top AEs selected by Bayesian hierarchical model
-and Bayesian model with Ising prior.
+and Bayesian model with Ising prior and producing table with detailed information fo these AEs.
 }
 \details{
-\code{gci3} calculates the incidence rate for each adverse event (AE) in treatment
-and in control group and also the confidence interval for this incidence getting from fisher exact test
-then the PT of AEs with the highest \code{ptnum} incidence rate difference between treatment and control
-group are returned. \cr
 \code{HIPLOT} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
 Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE from both two models(methods). It seperates
 the AEs slected by both Bayesian methods from AEs selected by only one method. Also it indicates whether the AE selected by these two Bayesian models were also selected by only based on
-incidence difference (function \code{gci3}). \cr
+incidence difference (function \code{\link{FETtable}}). \cr
+\code{HItable} creates a table for the detailed information for AE plotted in \code{HIPLOT}.
 }
 \examples{
 \dontrun{
@@ -54,14 +60,15 @@ SIM<-c(5000,1000,20)
 BETA.AB<-c(0.25, 0.75)
 ISINGDATA<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
 
-gci3(aedata=AEdata)
 HIPLOT(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
 HIPLOT(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio")
+
+HItable(hierdata=HIERDATA, isingdata=ISINGDATA)
+HItable(hierdata=HIERDATA, isingdata=ISINGDATA, ptnum=15, param="odds ratio")
+
 }
-
-
 
 }
 \seealso{
-\code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}
+\code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}, \code{\link{FETtable}}
 }

@@ -28,10 +28,6 @@ is the indicator for treatment and control group. TRTCTR=1 for treatment group a
 
 \item{k}{interger, the number of folds used to split the dataset for cross validation}
 
-\item{inits}{a list, with length equal to n_chain, each element of \code{inits} is
-also a list contains initials for each chain; it needs to provide initials for the following
-variables: mu.gamma.0, tau.gamma.0, mu.theta.0, tau.theta.0, alpha.pi, beta.pi}
-
 \item{n_burn}{integer, number of interations without saving posterior samples}
 
 \item{n_iter}{integer, number of interations saving posterior samples with every \code{thin}th iteration}
