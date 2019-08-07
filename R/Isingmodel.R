@@ -71,7 +71,7 @@
 #' BETA.AB<-c(0.25, 0.75)
 #' ISINGRAW<-Ising_history(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
 #' SUM_ISING<-sum_Ising(ISINGRAW)
-#' ISINGMODEL<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+#' ISINGDATA<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
 #' ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 #' }
 #'

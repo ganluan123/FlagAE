@@ -82,7 +82,7 @@
 #' INITS <- list(INITS1,INITS2)
 #' HIERRAW<-Hier_history(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 #' HIERRAW2<-Hier_history(aedata=AEdata, inits=INITS1, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1)
-#' HIERMODEL<-Hier(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+#' HIERDATA<-Hier(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 #' HIERPI<-Hiergetpi(aedata=AEdata, hierraw=HIERRAW)
 #' }
 #'
@@ -161,7 +161,7 @@ Hier_history<- function(aedata, inits, n_burn, n_iter, thin, n_adapt, n_chain) {
 
       D[i] <- X[i]*log(c[b[i], j[i]]) + (Nc-X[i])*log(1-c[b[i], j[i]]) + Y[i]*log(t[b[i], j[i]]) + (Nt-Y[i])*log(1-t[b[i],j[i]])
 
-      #below function is added by Jun
+
       Diff[b[i], j[i]] <- t[b[i], j[i]] - c[b[i], j[i]]
     }
 

@@ -3,18 +3,22 @@
 #' @title Plot for two Bayesian models
 #'
 #' @description These two functions are for plotting the top AEs selected by Bayesian hierarchical model
-#' and Bayesian model with Ising prior.
+#' and Bayesian model with Ising prior and producing table with detailed information fo these AEs.
 #'
-#' @details \code{gci3} calculates the incidence rate for each adverse event (AE) in treatment
-#' and in control group and also the confidence interval for this incidence getting from fisher exact test
-#' then the PT of AEs with the highest \code{ptnum} incidence rate difference between treatment and control
-#' group are returned. \cr
-#' \code{HIPLOT} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
+#' @details \code{HIPLOT} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
 #' Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE from both two models(methods). It seperates
 #' the AEs slected by both Bayesian methods from AEs selected by only one method. Also it indicates whether the AE selected by these two Bayesian models were also selected by only based on
-#' incidence difference (function \code{gci3}). \cr
+#' incidence difference (function \code{\link{FETtable}}). \cr
+#' \code{HItable} creates a table for the detailed information for AE plotted in \code{HIPLOT}.
 #'
-#' @inheritParams gci2
+#' @return
+#' \code{HIPLOT} returns a plot for the top \code{ptnum} (an integer) AE based on the selected statistics (either "odds ratio" or "risk difference"). Mean, 2.5% quantile,
+#' 97.5% quantile of the selected statistics of these AE from both two models were plotted.
+#' \cr
+#' \code{HItable} returns a table for the detailed information for AE plotted in \code{HIPLOT}. It contains a new column, "rank_diff_mean" or "rank_OR_mean"
+#' (based on the \code{param}), besides the columns of output from \code{\link{Hier}} or \code{\link{Ising}}. This new column is the rank of "Diff_mean" or "OR_mean"
+#' of the AE in each method.
+#'
 #' @param ptnum positive integer, number of AEs to be selected or plotted, default is 10
 #' @param hierdata output from function \code{\link{Hier}}
 #' @param isingdata output from function \code{\link{Ising}}
@@ -22,7 +26,7 @@
 #' default is "risk difference"
 #'
 #' @seealso
-#' \code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}
+#' \code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}, \code{\link{FETtable}}
 #'
 #' @examples
 #' \dontrun{
@@ -43,66 +47,23 @@
 #' BETA.AB<-c(0.25, 0.75)
 #' ISINGDATA<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
 #'
-#' gci3(aedata=AEdata)
 #' HIPLOT(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
 #' HIPLOT(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio")
+#'
+#' HItable(hierdata=HIERDATA, isingdata=ISINGDATA)
+#' HItable(hierdata=HIERDATA, isingdata=ISINGDATA, ptnum=15, param="odds ratio")
+#'
 #' }
 #'
-#'
-#'
-#' @export
-#'
 
-
-gci3<-function(aedata, ptnum=10, conf.level=0.95){
-
-  # This function calculate the incidence rate for each adverse event (AE) in treatment
-  # and in control group and also the confidence interval for this incidence getting
-  # from fisher exact test
-  # then the PT of AEs with the highest ptnum incidence rate difference between treatment and control
-  # group were returned
-
-  # The input aedata is the output from preprocess,
-  # it has the follwing fixed variable names
-  # the data includes AE, not total subjects
-  # Nc: number of control subjects
-  # AEc: number of subjects with AE, for each term, out of Nc subjects, control group
-  # Nt: number of treatment group subjects
-  # AEt: number of subjects with AE, for each term, out of Nt subjects, treatment group
-  # AEBODSYS: SOC of the adverse event
-  # AEDECOD: PT of the adverse event
-  # ptnum: the number of pt we want to return
-  # conf.level: confident level used for fisher exact test with default be 0.95
-
-  library(binom)
-  aedata$mc = aedata$AEc/aedata$Nc
-  aedata$llc = binom.confint(aedata$AEc,aedata$Nc, conf.level, method="exact")$lower
-  aedata$ulc = binom.confint(aedata$AEc,aedata$Nc, conf.level, method="exact")$upper
-
-  aedata$mt = aedata$AEt/aedata$Nt
-  aedata$llt = binom.confint(aedata$AEt,aedata$Nt, conf.level, method="exact")$lower
-  aedata$ult = binom.confint(aedata$AEt,aedata$Nt, conf.level, method="exact")$upper
-  aedata$d = abs(aedata$mt - aedata$mc)
-  aedata1=aedata[order(-aedata$d),]
-
-  pdat= data.frame(lapply(aedata1, as.character), stringsAsFactors=FALSE)
-  return(head(pdat, ptnum)$AEDECOD)
-}
-
-
-#########################################################################################################
-#########################################################################################################
-
-#' @rdname HierIsingplot
-#'
 #' @export
 HIPLOT<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" ){
   # hierdata is the result from function Hier
   # isingdata is the result from function Ising
   # aedata is the result from function preprocess
-  # PTNUM is the number of AE we want to plot
+  # ptnum is the number of AE we want to plot
   # param is the summary statistic we use to select the AE, it can be either "risk difference" or "odds ratio"
-  # for this function, it will first select the top PTNUM number of AE based on the summary statistic param from the selected method
+  # for this function, it will first select the top ptnum number of AE based on the summary statistic param from the selected method
   # then it will plotted the mean, 2.5% quantile, 97.5% quantile of the param of these AE from both two models(methods)
   # it also has one more parameter aedata
   # this is for fucntion gci2 to get the top AEs with risk difference based on fisher exact test
@@ -115,7 +76,7 @@ HIPLOT<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" )
   inputdata<- rbind(hierdata.new,isingdata)
 
   # get the PTs of AE with top ptnum difference in risk difference based on fisher exact test
-  FET<-gci3(aedata, ptnum)
+  FET<-FETtable(aedata, ptnum)$AEDECOD
 
   if (param=="risk difference"){
     # first to get the top 10 AEs from each method
@@ -246,8 +207,11 @@ HIPLOT<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" )
 
     setnames(test, old=c("OR_2.5%", "OR_97.5%", "Diff_2.5%","Diff_97.5%" ),
              new=c("OR_L", "OR_U","Diff_L","Diff_U"))
+    # print(test)
 
-    p <- ggplot(test, aes(x=x, y=OR_mean, color=Set, shape=Method)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U))
+    p <- ggplot(test, aes(x=x, y=OR_mean, color=Set, shape=Method)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U)) + coord_cartesian(ylim = c(0, 5))
+    #p <- ggplot(test, aes(x=x, y=OR_mean, color=Set, shape=Method)) + geom_pointrange(aes(ymin=OR_L, ymax=max(OR_U)))
+
     p1 <-p + labs(x = "Prefered Term",y="Odds ratio",title = paste0("Top ", ptnum, " AE of mean odds ratio"))
 
     a <- ifelse(test$category == 0, "red", "black")
@@ -255,4 +219,113 @@ HIPLOT<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" )
     p3 <- p2 + scale_x_continuous(breaks=seq(1,len,by=1),labels=PT_lable)
     return(p3)
   }
+}
+
+
+#########################################################################################################
+#########################################################################################################
+
+#' @rdname HierIsingplot
+#'
+#' @export
+HItable<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" ){
+  # hierdata is the result from function Hier
+  # isingdata is the result from function Ising
+  # aedata is the result from function preprocess
+  # ptnum is the number of AE we want to show
+  # param is the summary statistic we use to select the AE, it can be either "risk difference" or "odds ratio"
+  # for this function, it will first select the top ptnum number of AE based on the summary statistic param from the selected method
+  # then ouput a table containing the information for selected AE, information includes mean, 2.5% quantile, 97.5% quantile for
+  # either "risk difference" or "odds ratio" of both methods, also the rank of each AE in each method based on the mean
+
+
+  library(data.table)
+
+  hierdata.new<-hierdata
+  hierdata.new$gammaeq1<-NA
+  inputdata<- rbind(hierdata.new,isingdata)
+  #delete column "b", "i", "j"
+  drops<-c("b", "i", "j")
+  inputdata<-inputdata[, !names(inputdata) %in% drops]
+
+  if (param=="risk difference"){
+
+    # delete column "OR_mean", "OR_2.5%", "OR_97.5%"
+    drops2<-c("OR_mean", "OR_2.5%", "OR_97.5%")
+    inputdata<-inputdata[, !names(inputdata) %in% drops2]
+
+    # create a new column which indicates the rank of AE based on mean of risk difference in each method
+    inputdata$rank_diff_mean<-NA
+
+    # rank in Hierarchical model
+    test1_Hier<-subset(inputdata, Method=="Bayesian Hierarchical Model")
+    test1_Hier$rank_diff_mean<-as.integer(dim(test1_Hier)[1]-rank(test1_Hier$Diff_mean)+1)
+    test1_Hier<-test1_Hier[order(test1_Hier$rank_diff_mean), ]
+    # get the top ptnum AE in Hierarchical model
+    test2_Hier<-head(test1_Hier, ptnum)
+
+    # rank in Ising model
+    test1_Is<-subset(inputdata, Method=="Ising prior")
+    test1_Is$rank_diff_mean<-as.integer(dim(test1_Is)[1]-rank(test1_Is$Diff_mean)+1)
+    test1_Is<-test1_Is[order(test1_Is$rank_diff_mean), ]
+    # get the top ptnum AE in Ising prior model
+    test2_Is<-head(test1_Is, ptnum)
+
+
+    # combine test1_Hier and test1_Is
+    test1<-rbind(test1_Hier, test1_Is)
+
+    # combine test2_Hier and test2_Is
+    test2<-rbind(test2_Hier, test2_Is)
+
+    # get the AEs with top ptnum mean difference in either model
+    topPTs<-test2$PT
+    # remove the duplicates
+    topPTs<-unique(topPTs)
+
+    # get the table of PT in topPTs
+    Outputtable<-test1[test1$PT %in% topPTs, ]
+    Outputtable<-Outputtable[order(Outputtable[, "Method"], Outputtable[,"rank_diff_mean"]), ]
+  }
+
+
+  if (param=="odds ratio"){
+    # delete column "Diff_mean", "Diff_2.5%", "Diff_97.5%"
+    drops2<-c("Diff_mean", "Diff_2.5%", "Diff_97.5%")
+    inputdata<-inputdata[, !names(inputdata) %in% drops2]
+
+    # create a new column which indicates the rank of AE based on mean of risk difference in each method
+    inputdata$rank_OR_mean<-NA
+
+    # rank in Hierarchical model
+    test1_Hier<-subset(inputdata, Method=="Bayesian Hierarchical Model")
+    test1_Hier$rank_OR_mean<-as.integer(dim(test1_Hier)[1]-rank(test1_Hier$OR_mean)+1)
+    test1_Hier<-test1_Hier[order(test1_Hier$rank_OR_mean), ]
+    # get the top ptnum AE in Hierarchical model
+    test2_Hier<-head(test1_Hier, ptnum)
+
+    # rank in Ising model
+    test1_Is<-subset(inputdata, Method=="Ising prior")
+    test1_Is$rank_OR_mean<-as.integer(dim(test1_Is)[1]-rank(test1_Is$OR_mean)+1)
+    test1_Is<-test1_Is[order(test1_Is$rank_OR_mean), ]
+    # get the top ptnum AE in Ising prior model
+    test2_Is<-head(test1_Is, ptnum)
+
+
+    # combine test1_Hier and test1_Is
+    test1<-rbind(test1_Hier, test1_Is)
+
+    # combine test2_Hier and test2_Is
+    test2<-rbind(test2_Hier, test2_Is)
+
+    # get the AEs with top ptnum mean difference in either model
+    topPTs<-test2$PT
+    # remove the duplicates
+    topPTs<-unique(topPTs)
+
+    # get the table of PT in topPTs
+    Outputtable<-test1[test1$PT %in% topPTs, ]
+    Outputtable<-Outputtable[order(Outputtable[, "Method"], Outputtable[,"rank_OR_mean"]), ]
+  }
+  return(Outputtable)
 }

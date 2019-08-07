@@ -12,12 +12,7 @@ HIPLOT(hierdata, isingdata, aedata, ptnum = 10,
   param = "risk difference")
 }
 \arguments{
-\item{aedata}{output from function \code{\link{preprocess}}}
-
 \item{ptnum}{positive integer, number of AEs to be selected or plotted, default is 10}
-
-\item{conf.level}{number between 0 and 1, confidence level for constructing
-confidence interval, default is 0.95}
 
 \item{hierdata}{output from function \code{\link{Hier}}}
 

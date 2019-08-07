@@ -2,13 +2,13 @@
 % Please edit documentation in R/FisherETplot.R
 \name{FisherETplot}
 \alias{FisherETplot}
-\alias{gci}
-\alias{gci2}
+\alias{FETplot}
+\alias{FETtable}
 \title{Plot based on Fisher exact test}
 \usage{
-gci(aedata, ptnum = 10, conf.level = 0.95)
+FETplot(aedata, ptnum = 10, conf.level = 0.95)
 
-gci2(adsl, adae, ptnum = 10, conf.level = 0.95)
+FETtable(aedata, ptnum = 10, conf.level = 0.95)
 }
 \arguments{
 \item{aedata}{output from function \code{\link{preprocess}}}
@@ -17,35 +17,43 @@ gci2(adsl, adae, ptnum = 10, conf.level = 0.95)
 
 \item{conf.level}{number between 0 and 1, confidence level for constructing
 confidence interval, default is 0.95}
-
-\item{adsl}{subject level analysis dataset, it is a .csv file, it has to contain at least two columns, "USUBJID" and "TRTCTR", "TRTCTR"
-is the indicator for treatment and control group. TRTCTR=1 for treatment group and TRTCTR=0 for control group.}
-
-\item{adae}{adverse event analysis dataset, it is a .csv file, it has to contain at least three columns, "USUBJID", "AEBODSYS",and "AEDECOD"}
 }
 \description{
-Both functions \code{gci} and \code{gci2} plot the top AEs with
+Both functions \code{FETplot} plot the top AEs with
 top ptnum (one parameter, an integer) highest difference of incidence rate
 between treatment and control group(treatment - control). The incidence and
 confidence interval from treatment and control group are plotted. AEs from
-the same SoC is plotted in same color.
+the same SoC is plotted in same color. Function \code{FETtable} return a table containing
+information about AE selected.
 }
 \details{
 The incidence and confidence interval for both control and treatment
-group are calculated by Fisher exact test.\cr The only difference between
-\code{gci} and \code{gci2} is that \code{gci} takes the output of
-\code{preprocess} as the input, while \code{gci2} takes the raw data as the
-input.
+group are calculated by Fisher exact test. \code{FETplot} plots out the AEs with confidence
+interval, while \code{FETtable} output a table containig the information of
+AEs in the plot. The table from \code{FETtable} has the following columns:\
+AEBODSYS: SOC of the AE
+AEDECOD: PT term of the AE
+AEc: number of occurence of the AE in control group
+AEt: number of occurence of the AE in treatment group
+Nc: number of subjects in control group
+Nt: number of subjects in treatment group
+c_mean: incidence of the AE in control group
+c_lowerbd: lower bound of the confidence interval of incidence the AE in control group
+c_upperbd: upper bound of the confidence interval of incidence the AE in control group
+t_mean: incidence of the AE in treatment group
+t_lowerbd: lower bound of the confidence interval of incidence the AE in treatment group
+t_upperbd: upper bound of the confidence interval of incidence the AE in treatment group
+mean_diff: difference of incidence of the AE in treatment group and control group
 }
 \examples{
 \dontrun{
 data(ADAE)
 data(ADSL)
 AEdata<-preprocess(adsl=ADSL, adae=ADAE)
-gci(aedata=AEdata)
-gci(aedata=AEdata, ptnum=15, conf.level=0.9)
-gci2(adsl=ADSL, adae=ADAE)
-gci2(adsl=ADSL, adae=ADAE, ptnum=15, conf.level=0.9)
+FETplot(aedata=AEdata)
+FETplot(aedata=AEdata, ptnum=15, conf.level=0.9)
+FETtable(aedata=AEdata)
+FETtable(aedata=AEdata, ptnum=15, conf.level=0.9)
 }
 }
 \seealso{

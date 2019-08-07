@@ -99,7 +99,7 @@ INITS2<-list(mu.gamma.0=1, tau.gamma.0=1, mu.theta.0=1, tau.theta.0=1, alpha.pi=
 INITS <- list(INITS1,INITS2)
 HIERRAW<-Hier_history(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 HIERRAW2<-Hier_history(aedata=AEdata, inits=INITS1, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1)
-HIERMODEL<-Hier(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+HIERDATA<-Hier(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 HIERPI<-Hiergetpi(aedata=AEdata, hierraw=HIERRAW)
 }
 
