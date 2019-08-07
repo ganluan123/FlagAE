@@ -10,18 +10,18 @@
 \usage{
 Hier_history(aedata, n_burn, n_iter, thin, n_adapt, n_chain,
   alpha.gamma = 3, beta.gamma = 1, alpha.theta = 3, beta.theta = 1,
-  mu.gamma.0.0 = 0, tau.gamma.0.0 = 10, alpha.gamma.0.0 = 3,
+  mu.gamma.0.0 = 0, tau.gamma.0.0 = 0.1, alpha.gamma.0.0 = 3,
   beta.gamma.0.0 = 1, lambda.alpha = 0.1, lambda.beta = 0.1,
-  mu.theta.0.0 = 0, tau.theta.0.0 = 10, alpha.theta.0.0 = 3,
+  mu.theta.0.0 = 0, tau.theta.0.0 = 0.1, alpha.theta.0.0 = 3,
   beta.theta.0.0 = 1)
 
 sum_Hier(hierraw)
 
 Hier(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma = 3,
   beta.gamma = 1, alpha.theta = 3, beta.theta = 1,
-  mu.gamma.0.0 = 0, tau.gamma.0.0 = 10, alpha.gamma.0.0 = 3,
+  mu.gamma.0.0 = 0, tau.gamma.0.0 = 0.1, alpha.gamma.0.0 = 3,
   beta.gamma.0.0 = 1, lambda.alpha = 0.1, lambda.beta = 0.1,
-  mu.theta.0.0 = 0, tau.theta.0.0 = 10, alpha.theta.0.0 = 3,
+  mu.theta.0.0 = 0, tau.theta.0.0 = 0.1, alpha.theta.0.0 = 3,
   beta.theta.0.0 = 1)
 
 Hiergetpi(aedata, hierraw)
@@ -39,7 +39,7 @@ Hiergetpi(aedata, hierraw)
 
 \item{n_chain}{number of MCMC chains}
 
-\item{alpha.gamma/beta.gamma/alpha.theta/beta.theta/mu.gamma.0.0/tau.gamma.0.0/alpha.gamma.0.0/beta.gamma.0.0/lambda.alpha/lambda.beta/mu.theta.0.0/tau.theta.0.0/alpha.theta.0.0/beta.theta.0.0}{hyperparameters for prior distribution,
+\item{alpha.gamma...}{alpha.gamma and other parameters are hyperparameters for prior distribution,
 see the reference for the meaning of each parameters}
 }
 \value{
@@ -105,8 +105,8 @@ HIERRAW<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=
 HIERRAW2<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1)
 # you can specify the hyperparameter as shown below
 HIERRAW3<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1,
-alpha.gamma=5, beta.gamma=1, alpha.theta=3, beta.theta=1, mu.gamma.0.0=0.1, tau.gamma.0.0=10, alpha.gamma.0.0=5,
-beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0.1, tau.theta.0.0=10,alpha.theta.0.0=3, beta.theta.0.0=1)
+alpha.gamma=5, beta.gamma=1, alpha.theta=3, beta.theta=1, mu.gamma.0.0=0.1, tau.gamma.0.0=0.1, alpha.gamma.0.0=5,
+beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0.1, tau.theta.0.0=0.1,alpha.theta.0.0=3, beta.theta.0.0=1)
 
 HIERDATA<-Hier(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 HIERPI<-Hiergetpi(aedata=AEdata, hierraw=HIERRAW)

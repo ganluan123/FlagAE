@@ -141,7 +141,8 @@ Hier_history<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.ga
     library(mcmcplots)
     library(rjags)
     library(R2jags)
-    temp.fit <- jags.model(textConnection(model.binom),data=data,n.chains=1, n.adapt=n_adapt,quiet=TRUE)
+    temp.fit <- jags.model(textConnection(model.binom),data=data,n.chains=1,
+                           inits=list(.RNG.name='base::Wichmann-Hill', .RNG.seed=1), n.adapt=n_adapt,quiet=TRUE)
     update(temp.fit, n.iter=n_burn)
 
     # summary of posterior samples
@@ -155,7 +156,10 @@ Hier_history<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.ga
 
 
 
-Hier_history2<- function(aedata,  n_burn, n_iter, thin, n_adapt, n_chain) {
+Hier_history2<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma=3, beta.gamma=1,
+                        alpha.theta=3, beta.theta=1, mu.gamma.0.0=0, tau.gamma.0.0=0.1, alpha.gamma.0.0=3,
+                        beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0, tau.theta.0.0=0.1,
+                        alpha.theta.0.0=3, beta.theta.0.0=1) {
 
   # This function takes formatted Binomial data and output
   # Gibbs sample of the defined parameters
@@ -180,8 +184,7 @@ Hier_history2<- function(aedata,  n_burn, n_iter, thin, n_adapt, n_chain) {
   # n here is given by thin
   # n_adapt: number of adaptations
   # n_chain: number of MCMC chains
-  # inits is a list with length equal to n_chain
-  # each element of inits is one set of inits for each chain
+
 
   #############################################
   ## M1b: Binomial model with mixture prior ###
@@ -228,31 +231,37 @@ Hier_history2<- function(aedata,  n_burn, n_iter, thin, n_adapt, n_chain) {
   # SOC level parameters
 
   for(k in 1:B){
-    pi[k] ~ dbeta(alpha.pi, beta.pi)
-    mu.gamma[k] ~ dnorm(mu.gamma.0, tau.gamma.0)
-    tau.gamma[k] ~ dgamma(3,1)
-    mu.theta[k] ~ dnorm(mu.theta.0, tau.theta.0)
-    tau.theta[k] ~ dgamma(3,1)
+  pi[k] ~ dbeta(alpha.pi, beta.pi)
+  mu.gamma[k] ~ dnorm(mu.gamma.0, tau.gamma.0)
+  tau.gamma[k] ~ dgamma(alpha.gamma,beta.gamma)
+  mu.theta[k] ~ dnorm(mu.theta.0, tau.theta.0)
+  tau.theta[k] ~ dgamma(alpha.theta,beta.theta)
   }
 
-  # hyperpriors for gamma?s;
-  mu.gamma.0 ~ dnorm(0, 0.1)
-  tau.gamma.0 ~ dgamma(3,1)
+  # hyperpriors for gammas;
+  mu.gamma.0 ~ dnorm(mu.gamma.0.0, tau.gamma.0.0)
+  tau.gamma.0 ~ dgamma(alpha.gamma.0.0, beta.gamma.0.0)
 
-  # hyperpriors for theta?s;
-  mu.theta.0 ~ dnorm(0, 0.1)
-  tau.theta.0 ~ dgamma(3,1)
+  # hyperpriors for thetas;
+  mu.theta.0 ~ dnorm(mu.theta.0.0, tau.theta.0.0)
+  tau.theta.0 ~ dgamma(alpha.theta.0.0,beta.theta.0.0)
 
   # hyperpriors for pi?s;
-  alpha.pi ~ dexp(0.1)I(1,)
-  beta.pi ~ dexp(0.1)I(1,)
-  }"
+  alpha.pi ~ dexp(lambda.alpha)I(1,)
+  beta.pi ~ dexp(lambda.beta)I(1,)
+}"
 
 
   param<-c("OR", "Diff", "gamma", "theta")
 
   data <- list(Nae = nrow(aedata), Nc = aedata$Nc[1], Nt = aedata$Nt[1], B = max(aedata$b),
-               b = aedata$b, j = aedata$j, Y = aedata$AEt, X = aedata$AEc)
+               b = aedata$b, j = aedata$j, Y = aedata$AEt, X = aedata$AEc,
+               alpha.gamma=alpha.gamma, beta.gamma=beta.gamma,
+               alpha.theta=alpha.theta, beta.theta=beta.theta, mu.gamma.0.0=mu.gamma.0.0, tau.gamma.0.0=tau.gamma.0.0,
+               alpha.gamma.0.0=alpha.gamma.0.0,
+               beta.gamma.0.0=beta.gamma.0.0, lambda.alpha=lambda.alpha, lambda.beta=lambda.beta,
+               mu.theta.0.0=mu.theta.0.0, tau.theta.0.0=tau.theta.0.0,
+               alpha.theta.0.0=alpha.theta.0.0, beta.theta.0.0=beta.theta.0.0)
 
 
   # we use parallel computing for n_chain>1
@@ -269,7 +278,7 @@ Hier_history2<- function(aedata,  n_burn, n_iter, thin, n_adapt, n_chain) {
       library(mcmcplots)
       library(rjags)
       library(R2jags)
-      temp.fit <- jags.model(textConnection(model.binom),data=data,n.chains=1, n.adapt=n_adapt,quiet=TRUE)
+      temp.fit <- jags.model(textConnection(model.binom), data=data, n.chains=1, n.adapt=n_adapt, quiet=TRUE)
       update(temp.fit, n.iter=n_burn)
 
       # summary of posterior samples
@@ -290,8 +299,7 @@ Hier_history2<- function(aedata,  n_burn, n_iter, thin, n_adapt, n_chain) {
     library(mcmcplots)
     library(rjags)
     library(R2jags)
-    temp.fit <- jags.model(textConnection(model.binom),data=data, inits= list(".RNG.name"="base::Wichmann-Hill", ".RNG.seed"=1),
-                           n.chains=1, n.adapt=n_adapt,quiet=TRUE)
+    temp.fit <- jags.model(textConnection(model.binom),data=data,n.chains=1, n.adapt=n_adapt, quiet=TRUE)
     update(temp.fit, n.iter=n_burn)
 
     # summary of posterior samples
@@ -302,6 +310,8 @@ Hier_history2<- function(aedata,  n_burn, n_iter, thin, n_adapt, n_chain) {
 
   return(Final.est)
 }
+
+
 
 
 

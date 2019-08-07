@@ -15,7 +15,7 @@
 #' @param thin integer, samples are saved for every \code{thin}th iteration
 #' @param n_adapt integer, number of adaptations
 #' @param n_chain number of MCMC chains
-#' @param alpha.gamma/beta.gamma/alpha.theta/beta.theta/mu.gamma.0.0/tau.gamma.0.0/alpha.gamma.0.0/beta.gamma.0.0/lambda.alpha/lambda.beta/mu.theta.0.0/tau.theta.0.0/alpha.theta.0.0/beta.theta.0.0 hyperparameters for prior distribution,
+#' @param alpha.gamma... alpha.gamma and other parameters are hyperparameters for prior distribution,
 #' see the reference for the meaning of each parameters
 #'
 #'
@@ -79,8 +79,8 @@
 #' HIERRAW2<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1)
 #' # you can specify the hyperparameter as shown below
 #' HIERRAW3<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=1,
-#' alpha.gamma=5, beta.gamma=1, alpha.theta=3, beta.theta=1, mu.gamma.0.0=0.1, tau.gamma.0.0=10, alpha.gamma.0.0=5,
-#' beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0.1, tau.theta.0.0=10,alpha.theta.0.0=3, beta.theta.0.0=1)
+#' alpha.gamma=5, beta.gamma=1, alpha.theta=3, beta.theta=1, mu.gamma.0.0=0.1, tau.gamma.0.0=0.1, alpha.gamma.0.0=5,
+#' beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0.1, tau.theta.0.0=0.1,alpha.theta.0.0=3, beta.theta.0.0=1)
 #'
 #' HIERDATA<-Hier(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 #' HIERPI<-Hiergetpi(aedata=AEdata, hierraw=HIERRAW)
@@ -97,8 +97,8 @@
 #' @export
 
 Hier_history<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma=3, beta.gamma=1,
-                        alpha.theta=3, beta.theta=1, mu.gamma.0.0=0, tau.gamma.0.0=10, alpha.gamma.0.0=3,
-                        beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0, tau.theta.0.0=10,
+                        alpha.theta=3, beta.theta=1, mu.gamma.0.0=0, tau.gamma.0.0=0.1, alpha.gamma.0.0=3,
+                        beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0, tau.theta.0.0=0.1,
                         alpha.theta.0.0=3, beta.theta.0.0=1) {
 
   # This function takes formatted Binomial data and output
@@ -124,7 +124,6 @@ Hier_history<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.ga
   # n here is given by thin
   # n_adapt: number of adaptations
   # n_chain: number of MCMC chains
-  # the rest input are for hyperparameters for the prior distribution
 
 
   #############################################
@@ -180,11 +179,11 @@ Hier_history<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.ga
   }
 
   # hyperpriors for gammas;
-  mu.gamma.0 ~ dnorm(mu.gamma.0.0, 1/tau.gamma.0.0)
+  mu.gamma.0 ~ dnorm(mu.gamma.0.0, tau.gamma.0.0)
   tau.gamma.0 ~ dgamma(alpha.gamma.0.0, beta.gamma.0.0)
 
   # hyperpriors for thetas;
-  mu.theta.0 ~ dnorm(mu.theta.0.0, 1/tau.theta.0.0)
+  mu.theta.0 ~ dnorm(mu.theta.0.0, tau.theta.0.0)
   tau.theta.0 ~ dgamma(alpha.theta.0.0,beta.theta.0.0)
 
   # hyperpriors for pi?s;
@@ -240,7 +239,7 @@ Hier_history<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.ga
     library(mcmcplots)
     library(rjags)
     library(R2jags)
-    temp.fit <- jags.model(textConnection(model.binom),data=data,n.chains=1, n.adapt=n_adapt,quiet=TRUE)
+    temp.fit <- jags.model(textConnection(model.binom),data=data,n.chains=1, n.adapt=n_adapt, quiet=TRUE)
     update(temp.fit, n.iter=n_burn)
 
     # summary of posterior samples
@@ -251,6 +250,10 @@ Hier_history<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.ga
 
   return(Final.est)
   }
+
+
+
+
 
 #########################################################################################################
 #########################################################################################################
@@ -279,8 +282,8 @@ sum_Hier <- function(hierraw){
 #' @rdname Hiermodel
 #' @export
 Hier<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma=3, beta.gamma=1,
-                alpha.theta=3, beta.theta=1, mu.gamma.0.0=0, tau.gamma.0.0=10, alpha.gamma.0.0=3,
-                beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0, tau.theta.0.0=10,
+                alpha.theta=3, beta.theta=1, mu.gamma.0.0=0, tau.gamma.0.0=0.1, alpha.gamma.0.0=3,
+                beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0, tau.theta.0.0=0.1,
                 alpha.theta.0.0=3, beta.theta.0.0=1){
 
   # this function take the same input as Hier_history
