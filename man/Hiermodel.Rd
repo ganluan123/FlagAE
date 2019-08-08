@@ -6,6 +6,8 @@
 \alias{sum_Hier}
 \alias{Hier}
 \alias{Hiergetpi}
+\alias{Hierplot}
+\alias{Hiertable}
 \title{Three stages Bayesian Hierarchical Model}
 \usage{
 Hier_history(aedata, n_burn, n_iter, thin, n_adapt, n_chain,
@@ -25,6 +27,10 @@ Hier(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma = 3,
   beta.theta.0.0 = 1)
 
 Hiergetpi(aedata, hierraw)
+
+Hierplot(hierdata, ptnum = 10, param = "risk difference")
+
+Hiertable(hierdata, ptnum = 10, param = "risk difference")
 }
 \arguments{
 \item{aedata}{output from function \code{\link{preprocess}}}
@@ -38,6 +44,13 @@ Hiergetpi(aedata, hierraw)
 \item{n_adapt}{integer, number of adaptations}
 
 \item{n_chain}{number of MCMC chains}
+
+\item{hierdata}{utput from function \code{\link{Hier}}}
+
+\item{ptnum}{positive integer, number of AEs to be selected or plotted, default is 10}
+
+\item{param}{a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
+default is "risk difference"}
 
 \item{alpha.gamma...}{alpha.gamma and other parameters are hyperparameters for prior distribution,
 see the reference for the meaning of each parameters}
@@ -95,6 +108,11 @@ Functions here are to take the orginized data (output from
   \strong{\code{Hiergetpi}}: \cr
   This function calculates pit (incidence of AE in treatment group) and
   pic (incidence of AE in control group) from the output of \code{Hier_history}
+  The output is used for Loss function. \cr
+  \code{Hierplot} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
+  Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE. It shows the PTs of these AE from same SOC in same
+  color.  \cr
+  \code{Isingtable} creates a table for the detailed information for AE plotted in \code{Hierplot}.
 }
 \examples{
 \dontrun{
@@ -110,6 +128,11 @@ beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0.1, tau.theta
 
 HIERDATA<-Hier(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 HIERPI<-Hiergetpi(aedata=AEdata, hierraw=HIERRAW)
+
+Hierplot(HIERDATA)
+Hierplot(HIERDATA, ptnum=15, param="odds ratio")
+HIERTABLE<-Hiertable(HIERDATA)
+HIERTABLE2<-Hiertable(HIERDATA, ptnum=15, param="odds ratio")
 }
 
 }

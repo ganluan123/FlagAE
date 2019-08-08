@@ -6,6 +6,8 @@
 \alias{sum_Ising}
 \alias{Ising}
 \alias{Isinggetpi}
+\alias{Isingplot}
+\alias{Isingtable}
 \title{Bayesian Model with Ising Latent Variables}
 \usage{
 Ising_history(aedata, beta.ab, rho, theta, sim)
@@ -15,6 +17,10 @@ sum_Ising(isingraw)
 Ising(aedata, beta.ab, rho, theta, sim)
 
 Isinggetpi(aedata, isingraw)
+
+Isingplot(isingdata, ptnum = 10, param = "risk difference")
+
+Isingtable(isingdata, ptnum = 10, param = "risk difference")
 }
 \arguments{
 \item{aedata}{output from function \code{\link{preprocess}}}
@@ -31,6 +37,13 @@ sim[3] is like the parameter thin in MCMC settings. The total number of iteratio
 \eqn{sim[1]+sim[2]*sim[3]}}
 
 \item{isingraw}{output from function \code{\link{Ising_history}}}
+
+\item{isingdata}{output from function \code{\link{Ising}}}
+
+\item{ptnum}{positive integer, number of AEs to be selected or plotted, default is 10}
+
+\item{param}{a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
+default is "risk difference"}
 }
 \value{
 \code{Ising_history} returns a list with 3 matries, gamma, pi.t, and pi.c.
@@ -75,6 +88,10 @@ then summarize the result for each AE and merge the result with the raw data.
 \strong{\code{Isinggetpi}}: \cr
 This function calculates pit (incidence of AE in treatment group) and
 pic (incidence of AE in control group) from the output of \code{Ising_history}
+\code{Isingplot} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
+Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE. It shows the PTs of these AE from same SOC in same
+color.  \cr
+\code{Isingtable} creates a table for the detailed information for AE plotted in \code{Isingplot}.
 }
 \note{
 The incidence difference is calculated by (t-c) and the odds ratio is calculated by t(1-c)/c(1-t), where t,c are
@@ -93,6 +110,11 @@ ISINGRAW<-Ising_history(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = T
 SUM_ISING<-sum_Ising(ISINGRAW)
 ISINGDATA<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
 ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
+
+Isingplot(ISINGDATA)
+Isingplot(ISINGDATA, ptnum=15, param="odds ratio")
+ISINGTABLE<-Isingtable(ISINGDATA)
+ISINGTABLE2<-Isingtable(ISINGDATA, ptnum=15, param="odds ratio")
 }
 
 }

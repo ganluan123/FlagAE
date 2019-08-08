@@ -5,17 +5,17 @@
 #' @description These two functions are for plotting the top AEs selected by Bayesian hierarchical model
 #' and Bayesian model with Ising prior and producing table with detailed information fo these AEs.
 #'
-#' @details \code{HIPLOT} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
+#' @details \code{HIplot} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
 #' Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE from both two models(methods). It seperates
 #' the AEs slected by both Bayesian methods from AEs selected by only one method. Also it indicates whether the AE selected by these two Bayesian models were also selected by only based on
 #' incidence difference (function \code{\link{FETtable}}). \cr
-#' \code{HItable} creates a table for the detailed information for AE plotted in \code{HIPLOT}.
+#' \code{HItable} creates a table for the detailed information for AE plotted in \code{HIplot}.
 #'
 #' @return
-#' \code{HIPLOT} returns a plot for the top \code{ptnum} (an integer) AE based on the selected statistics (either "odds ratio" or "risk difference"). Mean, 2.5% quantile,
-#' 97.5% quantile of the selected statistics of these AE from both two models were plotted.
+#' \code{HIplot} returns a plot for the top \code{ptnum} (an integer) AE based on the selected statistics (either "odds ratio" or "risk difference"). Mean, 2.5%
+#' quantile, 97.5% quantile of the selected statistics of these AE from both two models were plotted.
 #' \cr
-#' \code{HItable} returns a table for the detailed information for AE plotted in \code{HIPLOT}. It contains a new column, "rank_diff_mean" or "rank_OR_mean"
+#' \code{HItable} returns a table for the detailed information for AE plotted in \code{HIplot}. It contains a new column, "rank_diff_mean" or "rank_OR_mean"
 #' (based on the \code{param}), besides the columns of output from \code{\link{Hier}} or \code{\link{Ising}}. This new column is the rank of "Diff_mean" or "OR_mean"
 #' of the AE in each method.
 #'
@@ -47,8 +47,8 @@
 #' BETA.AB<-c(0.25, 0.75)
 #' ISINGDATA<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
 #'
-#' HIPLOT(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
-#' HIPLOT(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio")
+#' HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
+#' HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio")
 #'
 #' HItable(hierdata=HIERDATA, isingdata=ISINGDATA)
 #' HItable(hierdata=HIERDATA, isingdata=ISINGDATA, ptnum=15, param="odds ratio")
@@ -57,13 +57,13 @@
 #'
 
 #' @export
-HIPLOT<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" ){
+HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" ){
   # hierdata is the result from function Hier
   # isingdata is the result from function Ising
   # aedata is the result from function preprocess
   # ptnum is the number of AE we want to plot
   # param is the summary statistic we use to select the AE, it can be either "risk difference" or "odds ratio"
-  # for this function, it will first select the top ptnum number of AE based on the summary statistic param from the selected method
+  # for this function, it will first select the top ptnum number of AE based on the summary statistic param from the both models(methods)
   # then it will plotted the mean, 2.5% quantile, 97.5% quantile of the param of these AE from both two models(methods)
   # it also has one more parameter aedata
   # this is for fucntion gci2 to get the top AEs with risk difference based on fisher exact test
