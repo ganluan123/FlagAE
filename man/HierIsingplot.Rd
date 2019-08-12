@@ -7,7 +7,7 @@
 \title{Plot for two Bayesian models}
 \usage{
 HIplot(hierdata, isingdata, aedata, ptnum = 10,
-  param = "risk difference")
+  param = "risk difference", OR_ylim = c(0, 5))
 
 HItable(hierdata, isingdata, aedata, ptnum = 10,
   param = "risk difference")
@@ -21,6 +21,8 @@ HItable(hierdata, isingdata, aedata, ptnum = 10,
 
 \item{param}{a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 default is "risk difference"}
+
+\item{OR_ylim}{a numeric vector of two elements, used to set y-axis limit for plotting based on "odds ratio"}
 }
 \value{
 \code{HIplot} returns a plot for the top \code{ptnum} (an integer) AE based on the selected statistics (either "odds ratio" or "risk difference"). Mean, 2.5%
@@ -38,7 +40,7 @@ and Bayesian model with Ising prior and producing table with detailed informatio
 \code{HIplot} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
 Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE from both two models(methods). It seperates
 the AEs slected by both Bayesian methods from AEs selected by only one method. Also it indicates whether the AE selected by these two Bayesian models were also selected by only based on
-incidence difference (function \code{\link{FETtable}}). \cr
+incidence difference (function \code{\link{BCItable}}). \cr
 \code{HItable} creates a table for the detailed information for AE plotted in \code{HIplot}.
 }
 \examples{
@@ -70,5 +72,5 @@ HItable(hierdata=HIERDATA, isingdata=ISINGDATA, ptnum=15, param="odds ratio")
 
 }
 \seealso{
-\code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}, \code{\link{FETtable}}
+\code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}, \code{\link{BCItable}}
 }

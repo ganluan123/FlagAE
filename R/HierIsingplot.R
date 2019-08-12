@@ -8,7 +8,7 @@
 #' @details \code{HIplot} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
 #' Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE from both two models(methods). It seperates
 #' the AEs slected by both Bayesian methods from AEs selected by only one method. Also it indicates whether the AE selected by these two Bayesian models were also selected by only based on
-#' incidence difference (function \code{\link{FETtable}}). \cr
+#' incidence difference (function \code{\link{BCItable}}). \cr
 #' \code{HItable} creates a table for the detailed information for AE plotted in \code{HIplot}.
 #'
 #' @return
@@ -24,9 +24,10 @@
 #' @param isingdata output from function \code{\link{Ising}}
 #' @param param a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 #' default is "risk difference"
+#' @param OR_ylim a numeric vector of two elements, used to set y-axis limit for plotting based on "odds ratio"
 #'
 #' @seealso
-#' \code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}, \code{\link{FETtable}}
+#' \code{\link{preprocess}}, \code{\link{Hier}}, \code{\link{Ising}}, \code{\link{BCItable}}
 #'
 #' @examples
 #' \dontrun{
@@ -57,7 +58,7 @@
 #'
 
 #' @export
-HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" ){
+HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", OR_ylim=c(0,5) ){
   # hierdata is the result from function Hier
   # isingdata is the result from function Ising
   # aedata is the result from function preprocess
@@ -66,7 +67,8 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" )
   # for this function, it will first select the top ptnum number of AE based on the summary statistic param from the both models(methods)
   # then it will plotted the mean, 2.5% quantile, 97.5% quantile of the param of these AE from both two models(methods)
   # it also has one more parameter aedata
-  # this is for fucntion gci2 to get the top AEs with risk difference based on fisher exact test
+  # this is for fucntion BCItable to get the top AEs with risk difference based on fisher exact test
+  # OR_ylim is for user to set up the y-axis limit for plotting based on "odds ratio"
 
   library(ggplot2)
   library(data.table)
@@ -76,7 +78,7 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" )
   inputdata<- rbind(hierdata.new,isingdata)
 
   # get the PTs of AE with top ptnum difference in risk difference based on fisher exact test
-  FET<-FETtable(aedata, ptnum)$AEDECOD
+  BCI<-BCItable(aedata, ptnum)$AEDECOD
 
   if (param=="risk difference"){
     # first to get the top 10 AEs from each method
@@ -119,10 +121,10 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" )
     test<-rbind(test_Union, test_Hier_Uni)
     test<-rbind(test, test_Is_Uni)
 
-    # add one more column "category" for the indication of whether the AE is inside FET, AE slected by fisher exact test
+    # add one more column "category" for the indication of whether the AE is inside BCI, AE slected by fisher exact test
     test$category<-0
-    if(length(intersect(FET, test$PT)))  test[which(test$PT %in% FET), ]$category<-1
-    # the if statement is to make sure there is at least one PT that in both FET and test
+    if(length(intersect(BCI, test$PT)))  test[which(test$PT %in% BCI), ]$category<-1
+    # the if statement is to make sure there is at least one PT that in both BCI and test
 
     # sort the test by Method, Ind, and -Diff_mean
     test<-test[order(test$Method, test$Ind, -test$Diff_mean),]
@@ -188,10 +190,10 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" )
     test<-rbind(test_Union, test_Hier_Uni)
     test<-rbind(test, test_Is_Uni)
 
-    # add one more column "category" for the indication of whether the AE is inside FET, AE slected by fisher exact test
+    # add one more column "category" for the indication of whether the AE is inside BCI, AE slected by fisher exact test
     test$category<-0
-    if(length(intersect(FET, test$PT)))  test[which(test$PT %in% FET), ]$category<-1
-    # the if statement is to make sure there is at least one PT that in both FET and test
+    if(length(intersect(BCI, test$PT)))  test[which(test$PT %in% BCI), ]$category<-1
+    # the if statement is to make sure there is at least one PT that in both BCI and test
 
     # sort the test by Method, Ind, and -Diff_mean
     test<-test[order(test$Method, test$Ind, -test$OR_mean),]
@@ -209,7 +211,7 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" )
              new=c("OR_L", "OR_U","Diff_L","Diff_U"))
     # print(test)
 
-    p <- ggplot(test, aes(x=x, y=OR_mean, color=Set, shape=Method)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U)) + coord_cartesian(ylim = c(0, 5))
+    p <- ggplot(test, aes(x=x, y=OR_mean, color=Set, shape=Method)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U)) + coord_cartesian(ylim = OR_ylim)
     #p <- ggplot(test, aes(x=x, y=OR_mean, color=Set, shape=Method)) + geom_pointrange(aes(ymin=OR_L, ymax=max(OR_U)))
 
     p1 <-p + labs(x = "Prefered Term",y="Odds ratio",title = paste0("Top ", ptnum, " AE of mean odds ratio"))

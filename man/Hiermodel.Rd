@@ -28,7 +28,8 @@ Hier(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma = 3,
 
 Hiergetpi(aedata, hierraw)
 
-Hierplot(hierdata, ptnum = 10, param = "risk difference")
+Hierplot(hierdata, ptnum = 10, param = "risk difference",
+  OR_ylim = c(0, 5))
 
 Hiertable(hierdata, ptnum = 10, param = "risk difference")
 }
@@ -51,6 +52,8 @@ Hiertable(hierdata, ptnum = 10, param = "risk difference")
 
 \item{param}{a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 default is "risk difference"}
+
+\item{OR_ylim}{a numeric vector of two elements, used to set y-axis limit for plotting based on "odds ratio"}
 
 \item{alpha.gamma...}{alpha.gamma and other parameters are hyperparameters for prior distribution,
 see the reference for the meaning of each parameters}
@@ -81,7 +84,7 @@ Functions here are to take the orginized data (output from
   used to model the probability of AEs. It is model 1b (Bayesian Logistic
   Regression Model with Mixture Prior on Log-OR) in H. Amy Xia , Haijun Ma &
   Bradley P. Carlin (2011) Bayesian Hierarchical Modeling for Detecting
-  Safety Signals in Clinical Trials, Journal of Biopharmaceutical Statistics,
+  SaBCIy Signals in Clinical Trials, Journal of Biopharmaceutical Statistics,
   21:5, 1006-1029, DOI: 10.1080/10543406.2010.520181) \cr
   \strong{\code{Hier_history}}: \cr
   This function takes formatted Binomial data and

@@ -10,19 +10,21 @@
 #'   See details for model description and difference between each function.
 #'
 #' @param aedata output from function \code{\link{preprocess}}
-#' @param beta.ab numeric vector with length of 2, is the prior for beta distribution
-#' @param rho numeric vector with length equals to the number of rows of data frame aedata
+#' @param beta.alpha numeric, is the prior for beta distribution, alpha parameter of beta distribution
+#' @param beta.beta numeric, is the prior for beta distribution, beta parameter of beta distribution
+#' @param rho either a number or numeric vector with length equals to the number of rows of data frame aedata.
+#' If it is a single number, then all adverse events use the same hyperparameter of rho. If it is a numeric vector, then each AE has
+#' its own hyperparameter of rho, and the sequence of rho value for each AE should be the same as the sequence of AE in aedata (AE in
+#' aedata should be ordered by b and j).
 #' @param theta numeric, \code{rho} and \code{theta} are parameters for Ising prior
-#' @param sim numeric vecotr with length of 3, integer for each element, sim[1] is the
-#' number of iterations of brun in; sim[2] is the number of interactions to recorded;
-#' sim[3] is like the parameter thin in MCMC settings. The total number of iterations running is
-#' \eqn{sim[1]+sim[2]*sim[3]}
+#' @param n_burn number of burn in for Gibbs Sampling
+#' @param n_iter number of interation for Gibbs Sampling
+#' @param thin thin for Gibbs Samping, parameters are recorded every thin-th interation
 #' @param isingraw output from function \code{\link{Ising_history}}
 #' @param isingdata output from function \code{\link{Ising}}
 #' @param ptnum positive integer, number of AEs to be selected or plotted, default is 10
 #' @param param a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 #' default is "risk difference"
-#' @param OR_ylim a numeric vector of two elements, used to set y-axis limit for plotting based on "odds ratio"
 #'
 #' @details
 #' \strong{Model}:\cr
@@ -31,7 +33,7 @@
 #' Biometrics 69.3 (2013): 661-672. \cr
 #' \strong{\code{Ising_history}}:\cr
 #' This function takes formatted Binomial data and
-#' performs the Bayesian analysis with Ising prior.#'
+#' performs the Bayesian analysis with Ising prior.
 #' \strong{\code{sum_Ising}}:\cr
 #' This function takes the result from function \code{Ising_history} as input
 #' and summarizes the result from \code{Ising_history}.\cr
@@ -102,7 +104,7 @@
 #'
 #' @export
 
-Ising_history <- function (aedata, beta.ab, rho, theta, sim){
+Ising_history <- function (aedata, n_burn, n_iter, thin, beta.alpha=0.25, beta.beta=0.75, rho, theta ){
 
   # this function is to perform the Bayesian analysis with Ising prior
   # it will output a list with 3 matries, gamma, pi.t, and pi.c
@@ -119,7 +121,7 @@ Ising_history <- function (aedata, beta.ab, rho, theta, sim){
   # AEt: number of subjects with AE, for each term, out of Nt subjects, treatment group
   # b: index for Soc
 
-  # parameter beta.ab is a two element vector, which is the prior for beta distribution
+  # parameter beta.alpha, and beta.beta are the priors for beta distribution
   # parameter rho, and theta are the hyperparameters for Ising prior
 
   # sim is a vector with 3 elements, the first element of sim is the iterations of burn in,
@@ -156,7 +158,7 @@ Ising_history <- function (aedata, beta.ab, rho, theta, sim){
   a.t<-beta.ab[1];b.t<-beta.ab[2];a.c<-beta.ab[1];b.c<-beta.ab[2]
 
   #simulation parameters
-  burn.in<-sim[1]; T<-sim[2]; thin<-sim[3]
+  burn.in<-n_burn; T<-floor(n_iter/thin); thin<-n_thin
 
   BF<-0
   #############################################################
@@ -170,11 +172,11 @@ Ising_history <- function (aedata, beta.ab, rho, theta, sim){
   for (k in 1:K) {
     #model 0: no treatment effect--> same pi across treatment arms
     #-->gamma.k=1
-    logM0<-lbeta(a.t+y[k], N-y[k]+b.t)-lbeta(a.t, b.t)
+    logM0<-lbeta(beta.alpha+y[k], N-y[k]+beta.beta)-lbeta(beta.alpha, beta.beta)
     #model 1:treatment effect-->different pi across treatment arm
     #-->gamma.k=0
-    logM1<-lbeta(a.t+y.t[k], n.t-y.t[k]+b.t)-lbeta(a.t, b.t)+
-      lbeta(a.c+y.c[k], n.c-y.c[k]+b.c)-lbeta(a.c, b.c)
+    logM1<-lbeta(beta.alpha+y.t[k], n.t-y.t[k]+beta.beta)-lbeta(beta.alpha, beta.beta)+
+      lbeta(beta.alpha+y.c[k], n.c-y.c[k]+beta.beta)-lbeta(beta.alpha, beta.beta)
     logdiff<-logM0-logM1
     BF[k]<-exp(logdiff)
   }
@@ -388,13 +390,12 @@ Isinggetpi<-function (aedata, isingraw){
 #' @rdname Isingpriormodel
 #'
 #' @export
-Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_ylim=c(0,5) ){
+Isingplot<-function(isingdata, ptnum=10, param="risk difference" ){
   # isingdata is the result from function Ising
   # ptnum is the number of AE we want to plot
   # param is the summary statistic we use to select the AE, it can be either "risk difference" or "odds ratio"
   # for this function, it will first select the top ptnum number of AE based on the summary statistic param from the selected method
   # then it will plotted the mean, 2.5% quantile, 97.5% quantile of the param of these AE
-  # OR_ylim is for user to set up the y-axis limit for plotting based on "odds ratio"
 
 
   library(ggplot2)
@@ -427,7 +428,7 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_ylim=c(0,5)
     setnames(test, old=c("Diff_2.5%","Diff_97.5%" ), new=c("Diff_L","Diff_U"))
 
     p <- ggplot(test, aes(x=x, y=Diff_mean)) + geom_pointrange(aes(ymin=Diff_L, ymax=Diff_U))
-    p1 <-p + labs(x = "Prefered Term",y="Risk difference",title = paste0("Top ", ptnum, " AE of mean risk difference plotted with 95% credible interval"))
+    p1 <-p + labs(x = "Prefered Term",y="Risk difference",title = paste0("Top ", ptnum, " AE of mean risk difference plotted with 95% interval"))
 
 
     p2 <- p1 + theme(axis.text.x = element_text(color = test$Color, size = 8, angle = 60, hjust = 1), axis.text.y = element_text(color = "black", size = 8))
@@ -460,8 +461,8 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_ylim=c(0,5)
     # change the name for plotting
     setnames(test, old=c("OR_2.5%", "OR_97.5%" ), new=c("OR_L", "OR_U"))
 
-    p <- ggplot(test, aes(x=x, y=OR_mean)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U)) + coord_cartesian(ylim = OR_ylim)
-    p1 <-p + labs(x = "Prefered Term",y="Odds ratio",title = paste0("Top ", ptnum, " AE of mean odds ratio plotted with 95% credible interval"))
+    p <- ggplot(test, aes(x=x, y=OR_mean)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U)) + coord_cartesian(ylim = c(0, 5))
+    p1 <-p + labs(x = "Prefered Term",y="Odds ratio",title = paste0("Top ", ptnum, " AE of mean odds ratio plotted with 95% interval"))
 
 
     p2 <- p1 + theme(axis.text.x = element_text(color = test$Color, size = 8, angle = 60, hjust = 1), axis.text.y = element_text(color = "black", size = 8))

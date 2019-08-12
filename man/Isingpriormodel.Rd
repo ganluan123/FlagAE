@@ -18,7 +18,8 @@ Ising(aedata, beta.ab, rho, theta, sim)
 
 Isinggetpi(aedata, isingraw)
 
-Isingplot(isingdata, ptnum = 10, param = "risk difference")
+Isingplot(isingdata, ptnum = 10, param = "risk difference",
+  OR_ylim = c(0, 5))
 
 Isingtable(isingdata, ptnum = 10, param = "risk difference")
 }
@@ -44,6 +45,8 @@ sim[3] is like the parameter thin in MCMC settings. The total number of iteratio
 
 \item{param}{a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 default is "risk difference"}
+
+\item{OR_ylim}{a numeric vector of two elements, used to set y-axis limit for plotting based on "odds ratio"}
 }
 \value{
 \code{Ising_history} returns a list with 3 matries, gamma, pi.t, and pi.c.

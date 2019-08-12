@@ -12,7 +12,12 @@ Lossfun(aedata, PI)
 
 kfdpar(adsl, adae, k)
 
-CVhier(AElist, inits, n_burn, n_iter, thin, n_adapt, n_chain)
+CVhier(AElist, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma = 3,
+  beta.gamma = 1, alpha.theta = 3, beta.theta = 1,
+  mu.gamma.0.0 = 0, tau.gamma.0.0 = 0.1, alpha.gamma.0.0 = 3,
+  beta.gamma.0.0 = 1, lambda.alpha = 0.1, lambda.beta = 0.1,
+  mu.theta.0.0 = 0, tau.theta.0.0 = 0.1, alpha.theta.0.0 = 3,
+  beta.theta.0.0 = 1)
 
 CVising(AElist, beta.ab, rho, theta, sim)
 }
@@ -98,13 +103,10 @@ AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 AELIST<-kfdpar(ADSL, ADAE, k=5)
 
 # Bayesian Hierarchical Model
-INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
-INITS2<-list(mu.gamma.0=1, tau.gamma.0=1, mu.theta.0=1, tau.theta.0=1, alpha.pi=10, beta.pi=10)
-INITS <- list(INITS1,INITS2)
-HIERRAW<-Hier_history(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+HIERRAW<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 HIERPI<-Hiergetpi(aedata=AEdata, hierraw=HIERRAW)
 loss_1<-Lossfun(aedata=AEdata, PI=HIERPI)
-LOSSHIER<-CVhier(AElist=AELIST, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+LOSSHIER<-CVhier(AElist=AELIST, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 LOSSHIER$trainloss # train loss
 LOSSHIER$testloss # test loss
 

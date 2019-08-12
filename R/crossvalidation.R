@@ -60,13 +60,10 @@
 #' AELIST<-kfdpar(ADSL, ADAE, k=5)
 #'
 #' # Bayesian Hierarchical Model
-#' INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
-#' INITS2<-list(mu.gamma.0=1, tau.gamma.0=1, mu.theta.0=1, tau.theta.0=1, alpha.pi=10, beta.pi=10)
-#' INITS <- list(INITS1,INITS2)
-#' HIERRAW<-Hier_history(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+#' HIERRAW<-Hier_history(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 #' HIERPI<-Hiergetpi(aedata=AEdata, hierraw=HIERRAW)
 #' loss_1<-Lossfun(aedata=AEdata, PI=HIERPI)
-#' LOSSHIER<-CVhier(AElist=AELIST, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+#' LOSSHIER<-CVhier(AElist=AELIST, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 #' LOSSHIER$trainloss # train loss
 #' LOSSHIER$testloss # test loss
 #'
@@ -281,7 +278,11 @@ kfdpar<-function (adsl, adae, k){
 #'
 #' @export
 
-CVhier<-function(AElist, inits, n_burn, n_iter, thin, n_adapt, n_chain){
+CVhier<-function(AElist, n_burn, n_iter, thin, n_adapt, n_chain,
+                 alpha.gamma=3, beta.gamma=1,
+                 alpha.theta=3, beta.theta=1, mu.gamma.0.0=0, tau.gamma.0.0=0.1, alpha.gamma.0.0=3,
+                 beta.gamma.0.0=1, lambda.alpha=0.1, lambda.beta=0.1, mu.theta.0.0=0, tau.theta.0.0=0.1,
+                 alpha.theta.0.0=3, beta.theta.0.0=1){
   # parameter AElist is the output from function kfoldpartition
   # the rest parameters are the same as paramters in function Hier_history with the same name
   # this function will calculate the train loss and test loss for each partition of the dataset
@@ -295,7 +296,11 @@ CVhier<-function(AElist, inits, n_burn, n_iter, thin, n_adapt, n_chain){
     test<-AElist[[i]]$test
 
     # train the model
-    train_hier<-Hier_history(train, inits, n_burn, n_iter, thin, n_adapt, n_chain)
+    train_hier<-Hier_history(aedata=train, n_burn=n_burn, n_iter=n_iter, thin=thin, n_adapt=n_adapt, n_chain=n_chain, alpha.gamma=alpha.gamma, beta.gamma=beta.gamma,
+                             alpha.theta=alpha.theta, beta.theta=beta.theta, mu.gamma.0.0=mu.gamma.0.0, tau.gamma.0.0=tau.gamma.0.0,
+                             alpha.gamma.0.0=alpha.gamma.0.0, beta.gamma.0.0=beta.gamma.0.0, lambda.alpha=lambda.alpha,
+                             lambda.beta=lambda.beta, mu.theta.0.0=mu.theta.0.0, tau.theta.0.0=tau.theta.0.0,
+                             alpha.theta.0.0=alpha.theta.0.0, beta.theta.0.0=beta.theta.0.0)
 
     # get pi
     train_hiergetpi<-Hiergetpi(aedata=train, hierraw = train_hier)

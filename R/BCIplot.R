@@ -1,21 +1,21 @@
 #########################################################################################################
 #########################################################################################################
 
-#' @name FisherETplot
+#' @name BCIplot
 #'
 #' @title Plot based on Fisher exact test
 #'
-#' @description Both functions \code{FETplot} plot the top AEs with
+#' @description Both functions \code{BCIplot} plot the top AEs with
 #' top ptnum (one parameter, an integer) highest difference of incidence rate
 #' between treatment and control group(treatment - control). The incidence and
 #' confidence interval from treatment and control group are plotted. AEs from
-#' the same SoC is plotted in same color. Function \code{FETtable} return a table containing
+#' the same SoC is plotted in same color. Function \code{BCItable} return a table containing
 #' information about AE selected.
 #'
 #' @details The incidence and confidence interval for both control and treatment
-#' group are calculated by Fisher exact test. \code{FETplot} plots out the AEs with confidence
-#' interval, while \code{FETtable} output a table containig the information of
-#' AEs in the plot. The table from \code{FETtable} has the following columns:\
+#' group are calculated by Fisher exact test. \code{BCIplot} plots out the AEs with confidence
+#' interval, while \code{BCItable} output a table containig the information of
+#' AEs in the plot. The table from \code{BCItable} has the following columns:\
 #' AEBODSYS: SOC of the AE
 #' AEDECOD: PT term of the AE
 #' AEc: number of occurence of the AE in control group
@@ -42,15 +42,15 @@
 #' data(ADAE)
 #' data(ADSL)
 #' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
-#' FETplot(aedata=AEdata)
-#' FETplot(aedata=AEdata, ptnum=15, conf.level=0.9)
-#' FETtable(aedata=AEdata)
-#' FETtable(aedata=AEdata, ptnum=15, conf.level=0.9)
+#' BCIplot(aedata=AEdata)
+#' BCIplot(aedata=AEdata, ptnum=15, conf.level=0.9)
+#' BCItable(aedata=AEdata)
+#' BCItable(aedata=AEdata, ptnum=15, conf.level=0.9)
 #' }
 #' @seealso \code{\link{preprocess}}
 #'
 #' @export
-FETplot <- function(aedata, ptnum=10, conf.level=0.95) {
+BCIplot <- function(aedata, ptnum=10, conf.level=0.95) {
 
   # This function calculate the incidence rate for each adverse event (AE) in
   # treatment and in control group and also the confidence interval for this
@@ -115,12 +115,12 @@ FETplot <- function(aedata, ptnum=10, conf.level=0.95) {
 
 #########################################################################################################
 #########################################################################################################
-#' @rdname FisherETplot
+#' @rdname BCIplot
 #' @export
 
-FETtable<-function(aedata, ptnum=10, conf.level=0.95){
-  # this fucntion take the same parameter as function FETplot and
-  # does the same thing as FETplot, instead of plotting out the
+BCItable<-function(aedata, ptnum=10, conf.level=0.95){
+  # this fucntion take the same parameter as function BCIplot and
+  # does the same thing as BCIplot, instead of plotting out the
   # AEs this function return a table containg the detailed information
   # about this top AEs
 

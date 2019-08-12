@@ -21,13 +21,14 @@
 #' @param ptnum positive integer, number of AEs to be selected or plotted, default is 10
 #' @param param a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 #' default is "risk difference"
+#' @param OR_ylim a numeric vector of two elements, used to set y-axis limit for plotting based on "odds ratio"
 #'
 #'
 #' @details \strong{Model}: \cr Here the 3-stage hierarchical bayesian model was
 #'   used to model the probability of AEs. It is model 1b (Bayesian Logistic
 #'   Regression Model with Mixture Prior on Log-OR) in H. Amy Xia , Haijun Ma &
 #'   Bradley P. Carlin (2011) Bayesian Hierarchical Modeling for Detecting
-#'   Safety Signals in Clinical Trials, Journal of Biopharmaceutical Statistics,
+#'   SaBCIy Signals in Clinical Trials, Journal of Biopharmaceutical Statistics,
 #'   21:5, 1006-1029, DOI: 10.1080/10543406.2010.520181) \cr
 #'   \strong{\code{Hier_history}}: \cr
 #'   This function takes formatted Binomial data and
@@ -404,12 +405,13 @@ Hiergetpi<-function(aedata, hierraw){
 
 #' @rdname Hiermodel
 #' @export
-Hierplot<-function(hierdata, ptnum=10, param="risk difference" ){
+Hierplot<-function(hierdata, ptnum=10, param="risk difference", OR_ylim=c(0,5) ){
   # hierdata is the result from function Hier
   # ptnum is the number of AE we want to plot
   # param is the summary statistic we use to select the AE, it can be either "risk difference" or "odds ratio"
   # for this function, it will first select the top ptnum number of AE based on the summary statistic param from the selected method
   # then it will plotted the mean, 2.5% quantile, 97.5% quantile of the param of these AE
+  # OR_ylim is for user to set up the y-axis limit for plotting based on "odds ratio"
 
 
   library(ggplot2)
@@ -442,7 +444,7 @@ Hierplot<-function(hierdata, ptnum=10, param="risk difference" ){
     setnames(test, old=c("Diff_2.5%","Diff_97.5%" ), new=c("Diff_L","Diff_U"))
 
     p <- ggplot(test, aes(x=x, y=Diff_mean)) + geom_pointrange(aes(ymin=Diff_L, ymax=Diff_U))
-    p1 <-p + labs(x = "Prefered Term",y="Risk difference",title = paste0("Top ", ptnum, " AE of mean risk difference plotted with 95% interval"))
+    p1 <-p + labs(x = "Prefered Term",y="Risk difference",title = paste0("Top ", ptnum, " AE of mean risk difference plotted with 95% credible interval"))
 
 
     p2 <- p1 + theme(axis.text.x = element_text(color = test$Color, size = 8, angle = 60, hjust = 1), axis.text.y = element_text(color = "black", size = 8))
@@ -475,8 +477,8 @@ Hierplot<-function(hierdata, ptnum=10, param="risk difference" ){
     # change the name for plotting
     setnames(test, old=c("OR_2.5%", "OR_97.5%" ), new=c("OR_L", "OR_U"))
 
-    p <- ggplot(test, aes(x=x, y=OR_mean)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U)) + coord_cartesian(ylim = c(0, 5))
-    p1 <-p + labs(x = "Prefered Term",y="Odds ratio",title = paste0("Top ", ptnum, " AE of mean odds ratio plotted with 95% interval"))
+    p <- ggplot(test, aes(x=x, y=OR_mean)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U)) + coord_cartesian(ylim = OR_ylim)
+    p1 <-p + labs(x = "Prefered Term",y="Odds ratio",title = paste0("Top ", ptnum, " AE of mean odds ratio plotted with 95% credible interval"))
 
 
     p2 <- p1 + theme(axis.text.x = element_text(color = test$Color, size = 8, angle = 60, hjust = 1), axis.text.y = element_text(color = "black", size = 8))
