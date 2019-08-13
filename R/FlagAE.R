@@ -2,9 +2,9 @@
 #'
 #' @details This packages can flag adverse events by three stage Bayesian Hierarchical model (see \code{\link{Hier}}) and by
 #' Bayesian model with Ising latent variable (see \code{\link{Ising}}). It also provide the option to flag adverase events by
-#' frequentist method (see \code{\link{gci2}}). Adverse events selected by both Bayesian methods can be plotted together
-#' for comparison (see \code{\link{HIPLOT}}). Last this package provides the options to compare these two bayesian models
-#' or compare differnt prior/initial values/parameter values in one model by calculating the loss function with
+#' frequentist method (see \code{\link{BCIplot}}). Adverse events selected by both Bayesian methods can be plotted together
+#' for comparison (see \code{\link{HIplot}}). Last this package provides the options to compare these two bayesian models
+#' or compare differnt hyperparamters for prior distribution in one model by calculating the loss function with
 #' cross validation (see \code{\link{CVhier}}, \code{\link{CVising}}).\cr
 #' Two datasets are also provided in this packages for demo purpose. They are \code{\link{ADAE}} (adverse event analysis dataset),
 #' and \code{\link{ADSL}} (subject level analysis dataset). They can be used for running the example code for each function to give
@@ -12,12 +12,14 @@
 #'
 #' @section Functions in this package:
 #'
-#' Raw data process: \code{\link{preprocess}}
-#' Plot based on Fisher exact test: \code{\link{gci}}, \code{\link{gci2}} \cr
-#' Three stages Bayesian Hierarchical Model: \code{\link{Hier_history}}, \code{\link{sum_Hier}}, \code{\link{Hier}}, \code{\link{Hiergetpi}} \cr
-#' Bayesian Model with Ising Latent Variables: \code{\link{Ising_history}}, \code{\link{sum_Ising}}, \code{\link{Ising}}, \code{\link{Isinggetpi}} \cr
-#' Plot for two Bayesian models: \code{\link{gci3}}, \code{\link{HIPLOT}} \cr
-#' Loss Calculation by Cross Validation: \code{\link{Lossfun}}, \code{\link{kfdpar}}, \code{\link{CVhier}}, \code{\link{cvising}}\cr
+#' Raw data process: \code{\link{preprocess}}\cr
+#' Plot based on Binomial confidence interval: \code{\link{BCIplot}}, \code{\link{BCItable}} \cr
+#' Three stages Bayesian Hierarchical Model: \code{\link{Hier_history}}, \code{\link{sum_Hier}}, \code{\link{Hier}}, \code{\link{Hiergetpi}}
+#' , \code{\link{Hierplot}}, \code{\link{Hiertable}}\cr
+#' Bayesian Model with Ising Latent Variables: \code{\link{Ising_history}}, \code{\link{sum_Ising}}, \code{\link{Ising}}, \code{\link{Isinggetpi}}
+#' , \code{\link{Isingplot}}, \code{\link{Isingtable}} \cr
+#' Plot for two Bayesian models: \code{\link{HIplot}}, \code{\link{HItable}} \cr
+#' Loss Calculation by Cross Validation: \code{\link{Lossfun}}, \code{\link{kfdpar}}, \code{\link{CVhier}}, \code{\link{CVising}}\cr
 #'
 #' @section Dataset in this package:
 #'
