@@ -69,13 +69,13 @@
 #'
 #' # Bayesian model with Ising prior
 #' RHO<-rep(1,dim(AEdata)[1])
-#' THETA<-0.02
-#' SIM<-c(5000,1000,20)
-#' BETA.AB<-c(0.25, 0.75)
-#' ISINGRAW<-Ising_history(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+#' ISINGRAW<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.75, alpha.t=0.5, beta.t=0.75,
+#'                                    alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 #' ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 #' loss_2<-Lossfun(aedata=AEdata, PI=ISINGPI)
-#' LOSSISING<-CVising(AElist=AELIST, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+#'
+#' LOSSISING<-CVising(AElist=AELIST, n_burn=100, n_iter=500, thin=20, alpha=0.5, beta=0.75, alpha.t=0.5, beta.t=0.75,
+#'                              alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 #' LOSSISING$trainloss # train loss
 #' LOSSISING$testloss # test loss
 #' }
@@ -322,7 +322,8 @@ CVhier<-function(AElist, n_burn, n_iter, thin, n_adapt, n_chain,
 #'
 #' @export
 
-CVising<-function(AElist, beta.ab, rho, theta, sim){
+CVising<-function(AElist, n_burn, n_iter, thin, alpha=0.25, beta=0.75, alpha.t=0.25, beta.t=0.75,
+                  alpha.c=0.25, beta.c=0.75, rho, theta){
   # parameter AElist is the output from function kfoldpartition
   # the rest parameters are the same as paramters in function Ising_history with the same name
   # this function will calculate the train loss and test loss for each partition of the dataset
@@ -335,7 +336,9 @@ CVising<-function(AElist, beta.ab, rho, theta, sim){
     test<-AElist[[i]]$test
 
     # train the model
-    train_ising<-Ising_history(train, beta.ab = beta.ab, rho = rho, theta = theta, sim = sim)
+    train_ising<-Ising_history(aedata =train, n_burn=n_burn, n_iter=n_iter, thin=thin,
+                               alpha=alpha, beta=beta, alpha.t=alpha.t, beta.t=beta.t,
+                               alpha.c=alpha.c, beta.c=beta.c, rho=rho, theta=theta)
 
     # get pi
     train_isinggetpi<-Isinggetpi(aedata=train, isingraw = train_ising)

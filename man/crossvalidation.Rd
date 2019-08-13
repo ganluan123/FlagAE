@@ -19,7 +19,9 @@ CVhier(AElist, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma = 3,
   mu.theta.0.0 = 0, tau.theta.0.0 = 0.1, alpha.theta.0.0 = 3,
   beta.theta.0.0 = 1)
 
-CVising(AElist, beta.ab, rho, theta, sim)
+CVising(AElist, n_burn, n_iter, thin, alpha = 0.25, beta = 0.75,
+  alpha.t = 0.25, beta.t = 0.75, alpha.c = 0.25, beta.c = 0.75,
+  rho, theta)
 }
 \arguments{
 \item{aedata}{output from function \code{\link{preprocess}}}
@@ -33,26 +35,34 @@ is the indicator for treatment and control group. TRTCTR=1 for treatment group a
 
 \item{k}{interger, the number of folds used to split the dataset for cross validation}
 
-\item{n_burn}{integer, number of interations without saving posterior samples}
+\item{n_burn}{number of burn in for Gibbs Sampling}
 
-\item{n_iter}{integer, number of interations saving posterior samples with every \code{thin}th iteration}
+\item{n_iter}{number of interation for Gibbs Sampling}
 
-\item{thin}{integer, samples are saved for every \code{thin}th iteration}
+\item{thin}{thin for Gibbs Samping, parameters are recorded every thin-th interation}
 
 \item{n_adapt}{integer, number of adaptations}
 
 \item{n_chain}{number of MCMC chains}
 
-\item{beta.ab}{numeric vector with length of 2, is the prior for beta distribution}
+\item{alpha}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, alpha parameter of beta distribution}
 
-\item{rho}{numeric vector with length equals to the number of rows of data frame aedata}
+\item{beta}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, beta parameter of beta distribution}
+
+\item{alpha.t}{numeric, is the prior for beta distribution, beta distribution for treatment group, alpha parameter of beta distribution}
+
+\item{beta.t}{numeric, is the prior for beta distribution, beta distribution for  treatment group, beta parameter of beta distribution}
+
+\item{alpha.c}{numeric, is the prior for beta distribution, beta distribution for control group, alpha parameter of beta distribution}
+
+\item{beta.c}{numeric, is the prior for beta distribution, beta distribution for control group, beta parameter of beta distribution}
+
+\item{rho}{either a number or numeric vector with length equals to the number of rows of data frame aedata.
+If it is a single number, then all adverse events use the same hyperparameter of rho. If it is a numeric vector, then each AE has
+its own hyperparameter of rho, and the sequence of rho value for each AE should be the same as the sequence of AE in aedata (AE in
+aedata should be ordered by b and j).}
 
 \item{theta}{numeric, \code{rho} and \code{theta} are parameters for Ising prior}
-
-\item{sim}{numeric vecotr with length of 3, integer for each element, sim[1] is the
-number of iterations of brun in; sim[2] is the number of interactions to recorded;
-sim[3] is like the parameter thin in MCMC settings. The total number of iterations running is
-\eqn{sim[1]+sim[2]*sim[3]}}
 }
 \value{
 \strong{\code{Lossfun}} returns the loss for dataset \code{aedata} based on the fitted incidence \code{PI}.\cr
@@ -112,13 +122,13 @@ LOSSHIER$testloss # test loss
 
 # Bayesian model with Ising prior
 RHO<-rep(1,dim(AEdata)[1])
-THETA<-0.02
-SIM<-c(5000,1000,20)
-BETA.AB<-c(0.25, 0.75)
-ISINGRAW<-Ising_history(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+ISINGRAW<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.75, alpha.t=0.5, beta.t=0.75,
+                                   alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 loss_2<-Lossfun(aedata=AEdata, PI=ISINGPI)
-LOSSISING<-CVising(AElist=AELIST, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+
+LOSSISING<-CVising(AElist=AELIST, n_burn=100, n_iter=500, thin=20, alpha=0.5, beta=0.75, alpha.t=0.5, beta.t=0.75,
+                             alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 LOSSISING$trainloss # train loss
 LOSSISING$testloss # test loss
 }

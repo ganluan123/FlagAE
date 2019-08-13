@@ -1,3 +1,4 @@
+
 #########################################################################################################
 #########################################################################################################
 
@@ -77,12 +78,11 @@
 #' data(ADSL)
 #' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 #' RHO<-rep(1,dim(AEdata)[1])
-#' THETA<-0.02
-#' SIM<-c(5000,1000,20)
-#' BETA.AB<-c(0.25, 0.75)
-#' ISINGRAW<-Ising_history(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+#' ISINGRAW<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
+#' ISINGRAW2<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, beta.alpha=0.5, beta.beta=0.5, rho=RHO, theta=0.02)
 #' SUM_ISING<-sum_Ising(ISINGRAW)
-#' ISINGDATA<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+#' ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
+#' ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, beta.alpha=0.5, beta.beta=0.5, rho=RHO, theta=0.02)
 #' ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 #'
 #' Isingplot(ISINGDATA)
@@ -124,10 +124,7 @@ Ising_history <- function (aedata, n_burn, n_iter, thin, beta.alpha=0.25, beta.b
   # parameter beta.alpha, and beta.beta are the priors for beta distribution
   # parameter rho, and theta are the hyperparameters for Ising prior
 
-  # sim is a vector with 3 elements, the first element of sim is the iterations of burn in,
-  # the second element of sim is the number of iterations we want to record
-  # the third element of sim is the thin
-  # please note the total number of iteration runing is sim[1]+sim[2]*sim[3]
+  # n_burn, n_iter, and thin are Gibbs sampling parameters, see help document for details.
 
   n.SOC <- max(aedata$b)
   # SOClist is a list for the index of AE that belongs to the same SoC
@@ -158,7 +155,7 @@ Ising_history <- function (aedata, n_burn, n_iter, thin, beta.alpha=0.25, beta.b
   a.t<-beta.ab[1];b.t<-beta.ab[2];a.c<-beta.ab[1];b.c<-beta.ab[2]
 
   #simulation parameters
-  burn.in<-n_burn; T<-floor(n_iter/thin); thin<-n_thin
+  burn.in<-n_burn; T<-floor(n_iter/thin); thin<-thin
 
   BF<-0
   #############################################################
@@ -181,6 +178,8 @@ Ising_history <- function (aedata, n_burn, n_iter, thin, beta.alpha=0.25, beta.b
     BF[k]<-exp(logdiff)
   }
 
+  # create the vector for rho if rho is a single number
+  if(length(rho)==1) rho<-rep(rho, dim(aedata)[1])
 
   #setup parallel backend to use multiple processors
   library(foreach)
@@ -303,7 +302,7 @@ sum_Ising <- function(isingraw) {
 #' @rdname Isingpriormodel
 #'
 #' @export
-Ising <- function (aedata, beta.ab, rho, theta, sim) {
+Ising <- function (aedata, n_burn, n_iter, thin, beta.alpha=0.25, beta.beta=0.75, rho, theta) {
   # this function takes the same parameters as function Ising_history
   # this function will take first take the result from Ising_history and
   # then summarize the result for each AE and merge the result with the raw data
@@ -315,7 +314,8 @@ Ising <- function (aedata, beta.ab, rho, theta, sim) {
   # SoC, PT, Nt, Nc, AEt, AEc
 
   aedata<-aedata[order(aedata$b),]
-  R_Ising_history<-Ising_history(aedata=aedata, beta.ab=beta.ab, rho=rho, theta=theta, sim=sim)
+  R_Ising_history<-Ising_history(aedata=aedata, n_burn=n_burn, n_iter=n_iter, thin=thin,
+                                 beta.alpha=beta.alpha, beta.beta=beta.beta, rho=rho, theta=theta)
 
   # summarize the primary result with sum_Ising
   out <- round(sum_Ising(R_Ising_history),3)

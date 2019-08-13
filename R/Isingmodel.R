@@ -10,18 +10,26 @@
 #'   See details for model description and difference between each function.
 #'
 #' @param aedata output from function \code{\link{preprocess}}
-#' @param beta.ab numeric vector with length of 2, is the prior for beta distribution
-#' @param rho numeric vector with length equals to the number of rows of data frame aedata
+#' @param alpha numeric, is the prior for beta distribution, beta distribution for both treatment and control group, alpha parameter of beta distribution
+#' @param beta numeric, is the prior for beta distribution, beta distribution for both treatment and control group, beta parameter of beta distribution
+#' @param alpha.t numeric, is the prior for beta distribution, beta distribution for treatment group, alpha parameter of beta distribution
+#' @param beta.t numeric, is the prior for beta distribution, beta distribution for  treatment group, beta parameter of beta distribution
+#' @param alpha.c numeric, is the prior for beta distribution, beta distribution for control group, alpha parameter of beta distribution
+#' @param beta.c numeric, is the prior for beta distribution, beta distribution for control group, beta parameter of beta distribution
+#'
 #' @param theta numeric, \code{rho} and \code{theta} are parameters for Ising prior
-#' @param sim numeric vecotr with length of 3, integer for each element, sim[1] is the
-#' number of iterations of brun in; sim[2] is the number of interactions to recorded;
-#' sim[3] is like the parameter thin in MCMC settings. The total number of iterations running is
-#' \eqn{sim[1]+sim[2]*sim[3]}
+#' @param rho either a number or numeric vector with length equals to the number of rows of data frame aedata.
+#' If it is a single number, then all adverse events use the same hyperparameter of rho. If it is a numeric vector, then each AE has
+#' its own hyperparameter of rho, and the sequence of rho value for each AE should be the same as the sequence of AE in aedata (AE in
+#' aedata should be ordered by b and j).
 #' @param isingraw output from function \code{\link{Ising_history}}
 #' @param isingdata output from function \code{\link{Ising}}
 #' @param ptnum positive integer, number of AEs to be selected or plotted, default is 10
 #' @param param a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 #' default is "risk difference"
+#' @param n_burn number of burn in for Gibbs Sampling
+#' @param n_iter number of interation for Gibbs Sampling
+#' @param thin thin for Gibbs Samping, parameters are recorded every thin-th interation
 #' @param OR_ylim a numeric vector of two elements, used to set y-axis limit for plotting based on "odds ratio"
 #'
 #' @details
@@ -75,16 +83,17 @@
 #' data(ADSL)
 #' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 #' RHO<-rep(1,dim(AEdata)[1])
-#' THETA<-0.02
-#' SIM<-c(5000,1000,20)
-#' BETA.AB<-c(0.25, 0.75)
-#' ISINGRAW<-Ising_history(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+#' ISINGRAW<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
+#' ISINGRAW2<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.5,
+#'                            alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 #' SUM_ISING<-sum_Ising(ISINGRAW)
-#' ISINGDATA<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+#' ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
+#' ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.5,
+#'                            alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 #' ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 #'
 #' Isingplot(ISINGDATA)
-#' Isingplot(ISINGDATA, ptnum=15, param="odds ratio")
+#' Isingplot(ISINGDATA, ptnum=15, param="odds ratio", OR_ylim=c(1,10))
 #' ISINGTABLE<-Isingtable(ISINGDATA)
 #' ISINGTABLE2<-Isingtable(ISINGDATA, ptnum=15, param="odds ratio")
 #' }
@@ -102,7 +111,8 @@
 #'
 #' @export
 
-Ising_history <- function (aedata, beta.ab, rho, theta, sim){
+Ising_history <- function (aedata, n_burn, n_iter, thin, alpha=0.25, beta=0.75, alpha.t=0.25, beta.t=0.75,
+                           alpha.c=0.25, beta.c=0.75, rho, theta ){
 
   # this function is to perform the Bayesian analysis with Ising prior
   # it will output a list with 3 matries, gamma, pi.t, and pi.c
@@ -119,13 +129,10 @@ Ising_history <- function (aedata, beta.ab, rho, theta, sim){
   # AEt: number of subjects with AE, for each term, out of Nt subjects, treatment group
   # b: index for Soc
 
-  # parameter beta.ab is a two element vector, which is the prior for beta distribution
+  # parameter beta.alpha, and beta.beta are the priors for beta distribution
   # parameter rho, and theta are the hyperparameters for Ising prior
 
-  # sim is a vector with 3 elements, the first element of sim is the iterations of burn in,
-  # the second element of sim is the number of iterations we want to record
-  # the third element of sim is the thin
-  # please note the total number of iteration runing is sim[1]+sim[2]*sim[3]
+  # n_burn, n_iter, and thin are Gibbs sampling parameters, see help document for details.
 
   n.SOC <- max(aedata$b)
   # SOClist is a list for the index of AE that belongs to the same SoC
@@ -153,10 +160,10 @@ Ising_history <- function (aedata, beta.ab, rho, theta, sim){
 
   K<-length(y.t)
   #beta
-  a.t<-beta.ab[1];b.t<-beta.ab[2];a.c<-beta.ab[1];b.c<-beta.ab[2]
+  # a.t<-beta.ab[1];b.t<-beta.ab[2];a.c<-beta.ab[1];b.c<-beta.ab[2]
 
   #simulation parameters
-  burn.in<-sim[1]; T<-sim[2]; thin<-sim[3]
+  burn.in<-n_burn; T<-floor(n_iter/thin); thin<-thin
 
   BF<-0
   #############################################################
@@ -170,15 +177,17 @@ Ising_history <- function (aedata, beta.ab, rho, theta, sim){
   for (k in 1:K) {
     #model 0: no treatment effect--> same pi across treatment arms
     #-->gamma.k=1
-    logM0<-lbeta(a.t+y[k], N-y[k]+b.t)-lbeta(a.t, b.t)
+    logM0<-lbeta(alpha+y[k], N-y[k]+beta)-lbeta(alpha, beta)
     #model 1:treatment effect-->different pi across treatment arm
     #-->gamma.k=0
-    logM1<-lbeta(a.t+y.t[k], n.t-y.t[k]+b.t)-lbeta(a.t, b.t)+
-      lbeta(a.c+y.c[k], n.c-y.c[k]+b.c)-lbeta(a.c, b.c)
+    logM1<-lbeta(alpha.t+y.t[k], n.t-y.t[k]+beta.t)-lbeta(alpha.t, beta.t)+
+      lbeta(alpha.c+y.c[k], n.c-y.c[k]+beta.c)-lbeta(alpha.c, beta.c)
     logdiff<-logM0-logM1
     BF[k]<-exp(logdiff)
   }
 
+  # create the vector for rho if rho is a single number
+  if(length(rho)==1) rho<-rep(rho, dim(aedata)[1])
 
   #setup parallel backend to use multiple processors
   library(foreach)
@@ -233,11 +242,11 @@ Ising_history <- function (aedata, beta.ab, rho, theta, sim){
 
       for (k in 1:K.m) {
         #set.seed(1)
-        pi.t.m[t,k]<- rbeta(1, a.t+y.m[k], N-y.m[k]+b.t)*g.t.m[k] +
-          rbeta(1, a.t+y.t.m[k], n.t-y.t.m[k]+b.t)*(1-g.t.m[k])
+        pi.t.m[t,k]<- rbeta(1, alpha+y.m[k], N-y.m[k]+beta)*g.t.m[k] +
+          rbeta(1, alpha.t+y.t.m[k], n.t-y.t.m[k]+beta.t)*(1-g.t.m[k])
         #set.seed(1)
         pi.c.m[t,k]<- pi.t.m[t,k]*g.t.m[k] +
-          rbeta(1, a.c+y.c.m[k], n.c-y.c.m[k]+b.t)*(1-g.t.m[k])
+          rbeta(1, alpha.c+y.c.m[k], n.c-y.c.m[k]+beta.c)*(1-g.t.m[k])
       }
 
       gamma.m[t,]<-g.t.m
@@ -301,7 +310,8 @@ sum_Ising <- function(isingraw) {
 #' @rdname Isingpriormodel
 #'
 #' @export
-Ising <- function (aedata, beta.ab, rho, theta, sim) {
+Ising <- function (aedata, n_burn, n_iter, thin, alpha=0.25, beta=0.75, alpha.t=0.25, beta.t=0.75,
+                   alpha.c=0.25, beta.c=0.75, rho, theta) {
   # this function takes the same parameters as function Ising_history
   # this function will take first take the result from Ising_history and
   # then summarize the result for each AE and merge the result with the raw data
@@ -313,7 +323,9 @@ Ising <- function (aedata, beta.ab, rho, theta, sim) {
   # SoC, PT, Nt, Nc, AEt, AEc
 
   aedata<-aedata[order(aedata$b),]
-  R_Ising_history<-Ising_history(aedata=aedata, beta.ab=beta.ab, rho=rho, theta=theta, sim=sim)
+  R_Ising_history<-Ising_history(aedata=aedata, n_burn=n_burn, n_iter=n_iter, thin=thin,
+                                 alpha=alpha, beta=beta, alpha.t=alpha.t, beta.t=beta.t,
+                                 alpha.c=alpha.c, beta.c=beta.c, rho=rho, theta=theta)
 
   # summarize the primary result with sum_Ising
   out <- round(sum_Ising(R_Ising_history),3)

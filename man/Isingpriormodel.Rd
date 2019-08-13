@@ -10,11 +10,15 @@
 \alias{Isingtable}
 \title{Bayesian Model with Ising Latent Variables}
 \usage{
-Ising_history(aedata, beta.ab, rho, theta, sim)
+Ising_history(aedata, n_burn, n_iter, thin, alpha = 0.25, beta = 0.75,
+  alpha.t = 0.25, beta.t = 0.75, alpha.c = 0.25, beta.c = 0.75,
+  rho, theta)
 
 sum_Ising(isingraw)
 
-Ising(aedata, beta.ab, rho, theta, sim)
+Ising(aedata, n_burn, n_iter, thin, alpha = 0.25, beta = 0.75,
+  alpha.t = 0.25, beta.t = 0.75, alpha.c = 0.25, beta.c = 0.75,
+  rho, theta)
 
 Isinggetpi(aedata, isingraw)
 
@@ -26,16 +30,30 @@ Isingtable(isingdata, ptnum = 10, param = "risk difference")
 \arguments{
 \item{aedata}{output from function \code{\link{preprocess}}}
 
-\item{beta.ab}{numeric vector with length of 2, is the prior for beta distribution}
+\item{n_burn}{number of burn in for Gibbs Sampling}
 
-\item{rho}{numeric vector with length equals to the number of rows of data frame aedata}
+\item{n_iter}{number of interation for Gibbs Sampling}
+
+\item{thin}{thin for Gibbs Samping, parameters are recorded every thin-th interation}
+
+\item{alpha}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, alpha parameter of beta distribution}
+
+\item{beta}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, beta parameter of beta distribution}
+
+\item{alpha.t}{numeric, is the prior for beta distribution, beta distribution for treatment group, alpha parameter of beta distribution}
+
+\item{beta.t}{numeric, is the prior for beta distribution, beta distribution for  treatment group, beta parameter of beta distribution}
+
+\item{alpha.c}{numeric, is the prior for beta distribution, beta distribution for control group, alpha parameter of beta distribution}
+
+\item{beta.c}{numeric, is the prior for beta distribution, beta distribution for control group, beta parameter of beta distribution}
+
+\item{rho}{either a number or numeric vector with length equals to the number of rows of data frame aedata.
+If it is a single number, then all adverse events use the same hyperparameter of rho. If it is a numeric vector, then each AE has
+its own hyperparameter of rho, and the sequence of rho value for each AE should be the same as the sequence of AE in aedata (AE in
+aedata should be ordered by b and j).}
 
 \item{theta}{numeric, \code{rho} and \code{theta} are parameters for Ising prior}
-
-\item{sim}{numeric vecotr with length of 3, integer for each element, sim[1] is the
-number of iterations of brun in; sim[2] is the number of interactions to recorded;
-sim[3] is like the parameter thin in MCMC settings. The total number of iterations running is
-\eqn{sim[1]+sim[2]*sim[3]}}
 
 \item{isingraw}{output from function \code{\link{Ising_history}}}
 
@@ -106,16 +124,17 @@ data(ADAE)
 data(ADSL)
 AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 RHO<-rep(1,dim(AEdata)[1])
-THETA<-0.02
-SIM<-c(5000,1000,20)
-BETA.AB<-c(0.25, 0.75)
-ISINGRAW<-Ising_history(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+ISINGRAW<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
+ISINGRAW2<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.5,
+                           alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 SUM_ISING<-sum_Ising(ISINGRAW)
-ISINGDATA<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
+ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.5,
+                           alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 
 Isingplot(ISINGDATA)
-Isingplot(ISINGDATA, ptnum=15, param="odds ratio")
+Isingplot(ISINGDATA, ptnum=15, param="odds ratio", OR_ylim=c(1,10))
 ISINGTABLE<-Isingtable(ISINGDATA)
 ISINGTABLE2<-Isingtable(ISINGDATA, ptnum=15, param="odds ratio")
 }
