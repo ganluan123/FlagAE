@@ -23,6 +23,8 @@
 #' \emph{b}: integer represents each Soc \cr
 #' \emph{i}: integer represents each PT \cr
 #' \emph{j}: order of PT in each SoC \cr
+#' \emph{Raw_Risk_Diff}: Risk difference between treatment and control group
+#' \emph{Raw_OR}: Odds ratio of the risk treatment/control
 #'
 #' @param adsl subject level analysis dataset, it is a .csv file, it has to contain at least two columns, "USUBJID" and "TRTCTR", "TRTCTR"
 #' is the indicator for treatment and control group. TRTCTR=1 for treatment group and TRTCTR=0 for control group.
@@ -103,6 +105,16 @@ preprocess<-function(adsl, adae){
   Tdat2['b']<-as.integer(factor(Tdat2$AEBODSYS))
   Tdat2['i']<-as.integer(factor(Tdat2$AEDECOD))
   Tdat2<-Tdat2 %>% group_by(b) %>% mutate(j = as.integer(factor(AEDECOD)))
+
+  # add two columns to dataset,
+  # Raw_Risk_Diff, risk difference directly calculated from data
+  # Raw_OR, Odds ratio directly calculated from data
+  pi_treat<-Tdat2$AEt/Tdat2$Nt
+  pi_ctrl<-Tdat2$AEc/Tdat2$Nc
+  Tdat2$Raw_Risk_Diff<-pi_treat-pi_ctrl
+  odds_treat<-pi_treat/(1-pi_treat)
+  odds_ctrl<-pi_ctrl/(1-pi_ctrl)
+  Tdat2$Raw_OR<-odds_treat/odds_ctrl
 
   # make sure Tdat2 is order by b and j for further analysis
   Tdat2<-Tdat2[order(Tdat2$b, Tdat2$j), ]

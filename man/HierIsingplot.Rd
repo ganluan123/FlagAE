@@ -50,24 +50,17 @@ data(ADSL)
 AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 
 # run the Hierarchical model
-INITS1<-list(mu.gamma.0=0.1, tau.gamma.0=0.1, mu.theta.0=0.1, tau.theta.0=0.1, alpha.pi=2, beta.pi=2)
-INITS2<-list(mu.gamma.0=1, tau.gamma.0=1, mu.theta.0=1, tau.theta.0=1, alpha.pi=10, beta.pi=10)
-INITS <- list(INITS1,INITS2)
-HIERDATA<-Hier(aedata=AEdata, inits=INITS, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
+HIERDATA<-Hier(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n_chain=2)
 
 # run the Ising model
-RHO<-rep(1,dim(AEdata)[1])
-THETA<-0.02
-SIM<-c(5000,1000,20)
-BETA.AB<-c(0.25, 0.75)
-ISINGDATA<-Ising(aedata = AEdata, beta.ab = BETA.AB, rho = RHO, theta = THETA, sim = SIM)
+ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5, beta_=0.5,
+                           alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 
 HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
 HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio")
 
 HItable(hierdata=HIERDATA, isingdata=ISINGDATA)
 HItable(hierdata=HIERDATA, isingdata=ISINGDATA, ptnum=15, param="odds ratio")
-
 }
 
 }

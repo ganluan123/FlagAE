@@ -19,7 +19,7 @@ CVhier(AElist, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma = 3,
   mu.theta.0.0 = 0, tau.theta.0.0 = 0.1, alpha.theta.0.0 = 3,
   beta.theta.0.0 = 1)
 
-CVising(AElist, n_burn, n_iter, thin, alpha = 0.25, beta = 0.75,
+CVising(AElist, n_burn, n_iter, thin, alpha_ = 0.25, beta_ = 0.75,
   alpha.t = 0.25, beta.t = 0.75, alpha.c = 0.25, beta.c = 0.75,
   rho, theta)
 }
@@ -45,9 +45,9 @@ is the indicator for treatment and control group. TRTCTR=1 for treatment group a
 
 \item{n_chain}{number of MCMC chains}
 
-\item{alpha}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, alpha parameter of beta distribution}
+\item{alpha_}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, alpha parameter of beta distribution}
 
-\item{beta}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, beta parameter of beta distribution}
+\item{beta_}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, beta parameter of beta distribution}
 
 \item{alpha.t}{numeric, is the prior for beta distribution, beta distribution for treatment group, alpha parameter of beta distribution}
 

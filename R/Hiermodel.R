@@ -51,7 +51,8 @@
 #'   \strong{\code{Hier}}:\cr
 #'   This function takes the same input as \code{Hier_history} and calculate the summary statistics
 #'   for output from \code{Hier_history}.
-#'   It outputs the summary statistics for each AE, combining with raw data. \cr
+#'   It outputs the summary statistics for each AE, combining with raw data, and also the Raw risk difference, Raw odds ratio
+#'   calculated from raw data.\cr
 #'   \strong{\code{Hiergetpi}}: \cr
 #'   This function calculates pit (incidence of AE in treatment group) and
 #'   pic (incidence of AE in control group) from the output of \code{Hier_history}
@@ -59,7 +60,7 @@
 #'   \code{Hierplot} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
 #'   Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE. It shows the PTs of these AE from same SOC in same
 #'   color.  \cr
-#'   \code{Isingtable} creates a table for the detailed information for AE plotted in \code{Hierplot}.
+#'   \code{Hiertable} creates a table for the detailed information for AE plotted in \code{Hierplot}.
 #'
 #'
 #'
@@ -339,17 +340,24 @@ Hier<- function(aedata, n_burn, n_iter, thin, n_adapt, n_chain, alpha.gamma=3, b
   colnames(summary.diff)[3:5] <- c('Diff_mean','Diff_2.5%','Diff_97.5%')
 
   # Summary statistics for parameter OR
-  summary.OR <- summary[summary$Sub=='OR',c('SoC','PT','Mean','2.5%','97.5%')]
-  colnames(summary.OR)[3:5] <- c('OR_mean','OR_2.5%','OR_97.5%')
+  summary.OR <- summary[summary$Sub=='OR',c('SoC','PT','50%','2.5%','97.5%')]
+  colnames(summary.OR)[3:5] <- c('OR_median','OR_2.5%','OR_97.5%')
 
   # merge summary statistics with raw data
   out <- merge(summary.diff,summary.OR,by=c('SoC','PT')) # this merge function also sort the resulting dataframe by Soc and PT
   # get the raw data from aedata
   Raw<-aedata
+
   names(Raw)[1:2]<-c("SoC", "PT")
   out<-merge(Raw, out, by=c("SoC", "PT"))
   Hier.plot <- out[order(out$SoC),]
   Hier.plot$Method = 'Bayesian Hierarchical Model'
+
+  #remove the column 'b', 'i', 'j'
+  drops<-c('b', 'i', 'j')
+  Hier.plot<-Hier.plot[, !names(Hier.plot) %in% drops]
+  #reorder the column
+  Hier.plot<-Hier.plot[, c(1:7, 9:11, 8, 12:15)]
   return (Hier.plot)
 }
 
@@ -405,7 +413,7 @@ Hiergetpi<-function(aedata, hierraw){
 
 #' @rdname Hiermodel
 #' @export
-Hierplot<-function(hierdata, ptnum=10, param="risk difference", OR_ylim=c(0,5) ){
+Hierplot<-function(hierdata, ptnum=10, param="risk difference", OR_xlim=c(0,5) ){
   # hierdata is the result from function Hier
   # ptnum is the number of AE we want to plot
   # param is the summary statistic we use to select the AE, it can be either "risk difference" or "odds ratio"
@@ -416,7 +424,7 @@ Hierplot<-function(hierdata, ptnum=10, param="risk difference", OR_ylim=c(0,5) )
 
   library(ggplot2)
   library(data.table)
-  inputdata<-hierdata
+  inputdata<-copy(hierdata)
 
   if (param=="risk difference"){
 
@@ -424,69 +432,122 @@ Hierplot<-function(hierdata, ptnum=10, param="risk difference", OR_ylim=c(0,5) )
     test<-inputdata[order(inputdata[, "Diff_mean"], decreasing=TRUE), ]
     test<-head(test, ptnum)
 
-    # create the x column for plotting
-    len<-dim(test)[1]
-    PT_lable<-test$PT[1:len]
-    test$x<-seq(1, len, by=1)
-
-    # plot PT from same SOC in same color
-    test$Color<-NA
-    Soc1<-unique(test$b)
-
-    for (iae in 1:ptnum){
-      # find the color for the PT
-      for (j in 1:length(Soc1)){
-        if (test[iae, "b"]==Soc1[j]) test[iae, "Color"]<-j
-      }
-    }
-
     # change the name for plotting
     setnames(test, old=c("Diff_2.5%","Diff_97.5%" ), new=c("Diff_L","Diff_U"))
 
-    p <- ggplot(test, aes(x=x, y=Diff_mean)) + geom_pointrange(aes(ymin=Diff_L, ymax=Diff_U))
-    p1 <-p + labs(x = "Prefered Term",y="Risk difference",title = paste0("Top ", ptnum, " AE of mean risk difference plotted with 95% credible interval"))
+    # create two set of test
+    test<-rbind(test, test)
 
+    # create the y column for plotting
+    test$yloc <- c(seq(from=ptnum+0.15, to=1.15, by=-1), seq(ptnum-0.15, to=0.85, by=-1))
 
-    p2 <- p1 + theme(axis.text.x = element_text(color = test$Color, size = 8, angle = 60, hjust = 1), axis.text.y = element_text(color = "black", size = 8))
-    p3 <- p2 + scale_x_continuous(breaks=seq(1,len,by=1),labels=PT_lable)
-    return(p3)
+    # create new column New_Diff, New_Diff_L, New_Diff_U
+    # with the data from model in above and data from Raw in bottom
+    test$New_Diff[1:ptnum]<-test$Diff_mean[1:ptnum]
+    test$New_Diff[(ptnum+1):(2*ptnum)]<-test$Raw_Risk_Diff[(ptnum+1):(2*ptnum)]
+    test$New_Diff_L[1:ptnum]<-test$Diff_L[1:ptnum]
+    test$New_Diff_L[(ptnum+1):(2*ptnum)]<-NA
+    test$New_Diff_U[1:ptnum]<-test$Diff_U[1:ptnum]
+    test$New_Diff_U[(ptnum+1):(2*ptnum)]<-NA
+    test$group<-c(rep("Model based", ptnum), rep("Raw data", ptnum))
+    test$textAE<-paste0(test$AEt, "/", test$Nt, " VS ", test$AEc, "/", test$Nc)
+    test$textAE[1:ptnum]<-NA
+
+    library(ggplot2)
+    # add the points at Mean
+    p<-ggplot(test, aes(x=New_Diff, y=yloc, shape=group))+geom_point(size=2)
+    # add line to shown confidence interval
+    p<-p+geom_segment(aes(x=New_Diff_L, xend=New_Diff_U, y=yloc, yend=yloc), size=1, na.rm=TRUE)
+
+    # add number of occurence on
+    p<-p+geom_text(aes(label=textAE, x=New_Diff+0.03, y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
+
+    # add title
+    p<-p+ggtitle(paste0("Top ", ptnum, " AE of mean risk difference plotted with 95% credible interval"))
+    p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
+
+    # ylable and x label
+    p<-p+xlab("Risk Difference")+ylab("PT")
+    p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
+
+    # x-axis coordinate and y-axis coordinate
+    p<-p + theme(axis.text.y = element_text(color = as.factor(test$SoC[1:ptnum]), size = 13))
+    p<-p + scale_y_continuous(breaks=seq(from=ptnum,to=1,by=-1),labels=test$PT[1:ptnum])
+    p<-p + theme(axis.text.x=element_text(size=13))
+
+    # legend size
+    p<-p+theme(legend.text = element_text(size=15), legend.title = element_blank())
+
+    return(p)
+
   }
 
   if (param=="odds ratio"){
 
     # first to get the top 10 AEs
-    test<-inputdata[order(inputdata[, "OR_mean"], decreasing=TRUE), ]
+    test<-inputdata[order(inputdata[, "OR_median"], decreasing=TRUE), ]
     test<-head(test, ptnum)
 
-    # create the x column for plotting
-    len<-dim(test)[1]
-    PT_lable<-test$PT[1:len]
-    test$x<-seq(1, len, by=1)
+    # change the name for plotting
+    setnames(test, old=c("OR_2.5%","OR_97.5%" ), new=c("OR_L","OR_U"))
 
-    # plot PT from same SOC in same color
-    test$Color<-NA
-    Soc1<-unique(test$b)
+    # create two set of test
+    test<-rbind(test, test)
 
-    for (iae in 1:ptnum){
-      # find the color for the PT
-      for (j in 1:length(Soc1)){
-        if (test[iae, "b"]==Soc1[j]) test[iae, "Color"]<-j
+    # create the y column for plotting
+    test$yloc <- c(seq(from=ptnum+0.15, to=1.15, by=-1), seq(ptnum-0.15, to=0.85, by=-1))
+
+    # create new column New_Diff, New_Diff_L, New_Diff_U
+    # with the data from model in above and data from Raw in bottom
+    test$New_OR[1:ptnum]<-test$OR_median[1:ptnum]
+    test$New_OR[(ptnum+1):(2*ptnum)]<-test$Raw_OR[(ptnum+1):(2*ptnum)]
+    test$New_OR_L[1:ptnum]<-test$OR_L[1:ptnum]
+    test$New_OR_L[(ptnum+1):(2*ptnum)]<-NA
+    test$New_OR_U[1:ptnum]<-test$OR_U[1:ptnum]
+    test$New_OR_U[(ptnum+1):(2*ptnum)]<-NA
+    test$group<-c(rep("Model based", ptnum), rep("Raw data", ptnum))
+    test$textAE<-paste0(test$AEt, "/", test$Nt, " VS ", test$AEc, "/", test$Nc)
+    test$textAE[1:ptnum]<-NA
+    # remove the Raw_OR that is Inf or out of the bounder of OR_xlim
+    for(i in (ptnum+1):(2*ptnum)){
+      if (test$New_OR[i]>OR_xlim[2]){
+        test$textAE[i-ptnum]<-NA
+        test$New_OR[i]<-NA
       }
     }
 
-    # change the name for plotting
-    setnames(test, old=c("OR_2.5%", "OR_97.5%" ), new=c("OR_L", "OR_U"))
+    TEST<-copy(test)
 
-    p <- ggplot(test, aes(x=x, y=OR_mean)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U)) + coord_cartesian(ylim = OR_ylim)
-    p1 <-p + labs(x = "Prefered Term",y="Odds ratio",title = paste0("Top ", ptnum, " AE of mean odds ratio plotted with 95% credible interval"))
+    library(ggplot2)
+    # add the points at Mean
+    p<-ggplot(test, aes(x=New_OR, y=yloc, shape=group))+geom_point(size=2, na.rm=TRUE) + coord_cartesian(xlim = OR_xlim)
+    # add line to shown confidence interval
+    p<-p+geom_segment(aes(x=New_OR_L, xend=New_OR_U, y=yloc, yend=yloc), size=1, na.rm=TRUE)
 
+    # add number of occurence on
+    p<-p+geom_text(aes(label=textAE, x=New_OR+((OR_xlim[2]-OR_xlim[1])/10), y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
 
-    p2 <- p1 + theme(axis.text.x = element_text(color = test$Color, size = 8, angle = 60, hjust = 1), axis.text.y = element_text(color = "black", size = 8))
-    p3 <- p2 + scale_x_continuous(breaks=seq(1,len,by=1),labels=PT_lable)
-    return(p3)
+    # add title
+    p<-p+ggtitle(paste0("Top ", ptnum, " AE of median odds ratio plotted with 95% credible interval"))
+    p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
+    # ylable and x label
+    p<-p+xlab("Risk Difference")+ylab("PT")
+    p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
+
+    # x-axis coordinate and y-axis coordinate
+    p<-p + theme(axis.text.y = element_text(color = as.factor(test$SoC[1:ptnum]), size = 13))
+    p<-p + scale_y_continuous(breaks=seq(from=ptnum,to=1,by=-1),labels=test$PT[1:ptnum])
+    p<-p + theme(axis.text.x=element_text(size=13))
+
+    # legend size
+    p<-p+theme(legend.text = element_text(size=15), legend.title = element_blank())
+
+    return(p)
   }
 }
+
+
 
 
 #########################################################################################################
@@ -511,7 +572,7 @@ Hiertable<-function(hierdata, ptnum=10, param="risk difference" ){
   if (param=="odds ratio"){
 
     # first to get the top 10 AEs
-    test<-inputdata[order(inputdata[, "OR_mean"], decreasing=TRUE), ]
+    test<-inputdata[order(inputdata[, "OR_median"], decreasing=TRUE), ]
     test<-head(test, ptnum)
   }
   return(test)

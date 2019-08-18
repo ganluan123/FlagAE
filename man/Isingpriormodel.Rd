@@ -10,13 +10,13 @@
 \alias{Isingtable}
 \title{Bayesian Model with Ising Latent Variables}
 \usage{
-Ising_history(aedata, n_burn, n_iter, thin, alpha = 0.25, beta = 0.75,
-  alpha.t = 0.25, beta.t = 0.75, alpha.c = 0.25, beta.c = 0.75,
-  rho, theta)
+Ising_history(aedata, n_burn, n_iter, thin, alpha_ = 0.25,
+  beta_ = 0.75, alpha.t = 0.25, beta.t = 0.75, alpha.c = 0.25,
+  beta.c = 0.75, rho, theta)
 
 sum_Ising(isingraw)
 
-Ising(aedata, n_burn, n_iter, thin, alpha = 0.25, beta = 0.75,
+Ising(aedata, n_burn, n_iter, thin, alpha_ = 0.25, beta_ = 0.75,
   alpha.t = 0.25, beta.t = 0.75, alpha.c = 0.25, beta.c = 0.75,
   rho, theta)
 
@@ -36,9 +36,9 @@ Isingtable(isingdata, ptnum = 10, param = "risk difference")
 
 \item{thin}{thin for Gibbs Samping, parameters are recorded every thin-th interation}
 
-\item{alpha}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, alpha parameter of beta distribution}
+\item{alpha_}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, alpha parameter of beta distribution}
 
-\item{beta}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, beta parameter of beta distribution}
+\item{beta_}{numeric, is the prior for beta distribution, beta distribution for both treatment and control group, beta parameter of beta distribution}
 
 \item{alpha.t}{numeric, is the prior for beta distribution, beta distribution for treatment group, alpha parameter of beta distribution}
 
@@ -105,7 +105,7 @@ and summarizes the result from \code{Ising_history}.\cr
 \strong{\code{Ising}}:\cr
 This function takes the same parameters as function \code{Ising_history}
 this function will take first take the result from \code{Ising_history} and
-then summarize the result for each AE and merge the result with the raw data.
+then summarize the result for each AE and merge the result with the raw data,and also the Raw risk difference, Raw odds ratio calculated from raw data.
 \strong{\code{Isinggetpi}}: \cr
 This function calculates pit (incidence of AE in treatment group) and
 pic (incidence of AE in control group) from the output of \code{Ising_history}
@@ -125,11 +125,11 @@ data(ADSL)
 AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 RHO<-rep(1,dim(AEdata)[1])
 ISINGRAW<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
-ISINGRAW2<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.5,
+ISINGRAW2<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5, beta_=0.5,
                            alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 SUM_ISING<-sum_Ising(ISINGRAW)
 ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
-ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.5,
+ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5, beta_=0.5,
                            alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 

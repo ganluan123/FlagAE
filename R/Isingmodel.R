@@ -10,8 +10,8 @@
 #'   See details for model description and difference between each function.
 #'
 #' @param aedata output from function \code{\link{preprocess}}
-#' @param alpha numeric, is the prior for beta distribution, beta distribution for both treatment and control group, alpha parameter of beta distribution
-#' @param beta numeric, is the prior for beta distribution, beta distribution for both treatment and control group, beta parameter of beta distribution
+#' @param alpha_ numeric, is the prior for beta distribution, beta distribution for both treatment and control group, alpha parameter of beta distribution
+#' @param beta_ numeric, is the prior for beta distribution, beta distribution for both treatment and control group, beta parameter of beta distribution
 #' @param alpha.t numeric, is the prior for beta distribution, beta distribution for treatment group, alpha parameter of beta distribution
 #' @param beta.t numeric, is the prior for beta distribution, beta distribution for  treatment group, beta parameter of beta distribution
 #' @param alpha.c numeric, is the prior for beta distribution, beta distribution for control group, alpha parameter of beta distribution
@@ -46,7 +46,7 @@
 #' \strong{\code{Ising}}:\cr
 #' This function takes the same parameters as function \code{Ising_history}
 #' this function will take first take the result from \code{Ising_history} and
-#' then summarize the result for each AE and merge the result with the raw data.
+#' then summarize the result for each AE and merge the result with the raw data,and also the Raw risk difference, Raw odds ratio calculated from raw data.
 #' \strong{\code{Isinggetpi}}: \cr
 #' This function calculates pit (incidence of AE in treatment group) and
 #' pic (incidence of AE in control group) from the output of \code{Ising_history}
@@ -84,11 +84,11 @@
 #' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
 #' RHO<-rep(1,dim(AEdata)[1])
 #' ISINGRAW<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
-#' ISINGRAW2<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.5,
+#' ISINGRAW2<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5, beta_=0.5,
 #'                            alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 #' SUM_ISING<-sum_Ising(ISINGRAW)
 #' ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, rho=1, theta=0.02)
-#' ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.5,
+#' ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5, beta_=0.5,
 #'                            alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 #' ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 #'
@@ -111,7 +111,7 @@
 #'
 #' @export
 
-Ising_history <- function (aedata, n_burn, n_iter, thin, alpha=0.25, beta=0.75, alpha.t=0.25, beta.t=0.75,
+Ising_history <- function (aedata, n_burn, n_iter, thin, alpha_=0.25, beta_=0.75, alpha.t=0.25, beta.t=0.75,
                            alpha.c=0.25, beta.c=0.75, rho, theta ){
 
   # this function is to perform the Bayesian analysis with Ising prior
@@ -177,7 +177,7 @@ Ising_history <- function (aedata, n_burn, n_iter, thin, alpha=0.25, beta=0.75, 
   for (k in 1:K) {
     #model 0: no treatment effect--> same pi across treatment arms
     #-->gamma.k=1
-    logM0<-lbeta(alpha+y[k], N-y[k]+beta)-lbeta(alpha, beta)
+    logM0<-lbeta(alpha_+y[k], N-y[k]+beta_)-lbeta(alpha_, beta_)
     #model 1:treatment effect-->different pi across treatment arm
     #-->gamma.k=0
     logM1<-lbeta(alpha.t+y.t[k], n.t-y.t[k]+beta.t)-lbeta(alpha.t, beta.t)+
@@ -242,7 +242,7 @@ Ising_history <- function (aedata, n_burn, n_iter, thin, alpha=0.25, beta=0.75, 
 
       for (k in 1:K.m) {
         #set.seed(1)
-        pi.t.m[t,k]<- rbeta(1, alpha+y.m[k], N-y.m[k]+beta)*g.t.m[k] +
+        pi.t.m[t,k]<- rbeta(1, alpha_+y.m[k], N-y.m[k]+beta_)*g.t.m[k] +
           rbeta(1, alpha.t+y.t.m[k], n.t-y.t.m[k]+beta.t)*(1-g.t.m[k])
         #set.seed(1)
         pi.c.m[t,k]<- pi.t.m[t,k]*g.t.m[k] +
@@ -293,7 +293,7 @@ sum_Ising <- function(isingraw) {
   p.gamma.k.eq1 <-apply(isingraw$gamma,2,mean) # probability that gamma=1
   pT.gt.pC <-apply(isingraw$pi.t>isingraw$pi.c,2,mean) # probability that pi.t > pi.c
   #log.rr <- apply(log(isingraw$pi.t)-log(isingraw$pi.c),2,mean) # difference of log(pi.t) and log(pi.c)
-  log.or <- apply(log(isingraw$pi.t/(1-isingraw$pi.t))-log(isingraw$pi.c/(1-isingraw$pi.c)),2,mean) # log odds ratio
+  log.or <- apply(log(isingraw$pi.t/(1-isingraw$pi.t))-log(isingraw$pi.c/(1-isingraw$pi.c)),2,quantile,probs=0.5) # log odds ratio
   log.or.LL <- apply(log(isingraw$pi.t/(1-isingraw$pi.t))-log(isingraw$pi.c/(1-isingraw$pi.c)),2,quantile,probs=0.025) # lower 2.5% quantile of log odds ratio
   log.or.UL <- apply(log(isingraw$pi.t/(1-isingraw$pi.t))-log(isingraw$pi.c/(1-isingraw$pi.c)),2,quantile,probs=0.975) # upper 2.5% quantile of log odds ratio
   rd <- apply(isingraw$pi.t-isingraw$pi.c,2,mean) # difference of pi.t and pi.c, incidence rate difference
@@ -310,7 +310,7 @@ sum_Ising <- function(isingraw) {
 #' @rdname Isingpriormodel
 #'
 #' @export
-Ising <- function (aedata, n_burn, n_iter, thin, alpha=0.25, beta=0.75, alpha.t=0.25, beta.t=0.75,
+Ising <- function (aedata, n_burn, n_iter, thin, alpha_=0.25, beta_=0.75, alpha.t=0.25, beta.t=0.75,
                    alpha.c=0.25, beta.c=0.75, rho, theta) {
   # this function takes the same parameters as function Ising_history
   # this function will take first take the result from Ising_history and
@@ -324,7 +324,7 @@ Ising <- function (aedata, n_burn, n_iter, thin, alpha=0.25, beta=0.75, alpha.t=
 
   aedata<-aedata[order(aedata$b),]
   R_Ising_history<-Ising_history(aedata=aedata, n_burn=n_burn, n_iter=n_iter, thin=thin,
-                                 alpha=alpha, beta=beta, alpha.t=alpha.t, beta.t=beta.t,
+                                 alpha_=alpha_, beta_=beta_, alpha.t=alpha.t, beta.t=beta.t,
                                  alpha.c=alpha.c, beta.c=beta.c, rho=rho, theta=theta)
 
   # summarize the primary result with sum_Ising
@@ -337,8 +337,8 @@ Ising <- function (aedata, n_burn, n_iter, thin, alpha=0.25, beta=0.75, alpha.t=
   # get the probability that gamma=1, ie. no difference between treatment and control group
   Ising.plot$gammaeq1<-as.numeric(as.character(Ising.plot$p.gamma.k.eq1))
 
-  # get Odds ratio mean and quantile
-  Ising.plot$OR_mean <- exp(as.numeric(as.character(Ising.plot$log.or)))
+  # get Odds ratio median and quantile
+  Ising.plot$OR_median <- exp(as.numeric(as.character(Ising.plot$log.or)))
   Ising.plot$'OR_2.5%' <- exp(as.numeric(as.character(Ising.plot$log.or.LL)))
   Ising.plot$'OR_97.5%' <- exp(as.numeric(as.character(Ising.plot$log.or.UL)))
 
@@ -349,13 +349,21 @@ Ising <- function (aedata, n_burn, n_iter, thin, alpha=0.25, beta=0.75, alpha.t=
 
   Ising.plot$Method <- 'Ising prior'
 
-  Ising.plot <- Ising.plot[,c('SoC','PT','Diff_mean','Diff_2.5%','Diff_97.5%','OR_mean','OR_2.5%','OR_97.5%','Method','gammaeq1')]
+  Ising.plot <- Ising.plot[,c('SoC','PT','Diff_mean','Diff_2.5%','Diff_97.5%','OR_median','OR_2.5%','OR_97.5%','Method','gammaeq1')]
 
   # get the raw data from aedata
   Raw<-aedata
+
   names(Raw)[1:2]<-c("SoC", "PT")
   # merge with raw data
   Ising.plot<-merge(Raw, Ising.plot, by=c("SoC", "PT"))
+  Ising.plot <- Ising.plot[order(Ising.plot$SoC),]
+  #remove the column 'b', 'i', 'j'
+  drops<-c('b', 'i', 'j')
+  Ising.plot<-Ising.plot[, !names(Ising.plot) %in% drops]
+  # reorder the column
+  Ising.plot[, c(1:7, 9:11, 8, 12:16)]
+
 }
 
 
@@ -400,18 +408,17 @@ Isinggetpi<-function (aedata, isingraw){
 #' @rdname Isingpriormodel
 #'
 #' @export
-Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_ylim=c(0,5) ){
+Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_xlim=c(0,5) ){
   # isingdata is the result from function Ising
   # ptnum is the number of AE we want to plot
   # param is the summary statistic we use to select the AE, it can be either "risk difference" or "odds ratio"
   # for this function, it will first select the top ptnum number of AE based on the summary statistic param from the selected method
   # then it will plotted the mean, 2.5% quantile, 97.5% quantile of the param of these AE
-  # OR_ylim is for user to set up the y-axis limit for plotting based on "odds ratio"
 
 
   library(ggplot2)
   library(data.table)
-  inputdata<-isingdata
+  inputdata<-copy(isingdata)
 
   if (param=="risk difference"){
 
@@ -419,69 +426,121 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_ylim=c(0,5)
     test<-inputdata[order(inputdata[, "Diff_mean"], decreasing=TRUE), ]
     test<-head(test, ptnum)
 
-    # create the x column for plotting
-    len<-dim(test)[1]
-    PT_lable<-test$PT[1:len]
-    test$x<-seq(1, len, by=1)
-
-    # plot PT from same SOC in same color
-    test$Color<-NA
-    Soc1<-unique(test$b)
-
-    for (iae in 1:ptnum){
-      # find the color for the PT
-      for (j in 1:length(Soc1)){
-        if (test[iae, "b"]==Soc1[j]) test[iae, "Color"]<-j
-      }
-    }
-
     # change the name for plotting
     setnames(test, old=c("Diff_2.5%","Diff_97.5%" ), new=c("Diff_L","Diff_U"))
 
-    p <- ggplot(test, aes(x=x, y=Diff_mean)) + geom_pointrange(aes(ymin=Diff_L, ymax=Diff_U))
-    p1 <-p + labs(x = "Prefered Term",y="Risk difference",title = paste0("Top ", ptnum, " AE of mean risk difference plotted with 95% credible interval"))
+    # create two set of test
+    test<-rbind(test, test)
 
+    # create the y column for plotting
+    test$yloc <- c(seq(from=ptnum+0.15, to=1.15, by=-1), seq(ptnum-0.15, to=0.85, by=-1))
 
-    p2 <- p1 + theme(axis.text.x = element_text(color = test$Color, size = 8, angle = 60, hjust = 1), axis.text.y = element_text(color = "black", size = 8))
-    p3 <- p2 + scale_x_continuous(breaks=seq(1,len,by=1),labels=PT_lable)
-    return(p3)
+    # create new column New_Diff, New_Diff_L, New_Diff_U
+    # with the data from model in above and data from Raw in bottom
+    test$New_Diff[1:ptnum]<-test$Diff_mean[1:ptnum]
+    test$New_Diff[(ptnum+1):(2*ptnum)]<-test$Raw_Risk_Diff[(ptnum+1):(2*ptnum)]
+    test$New_Diff_L[1:ptnum]<-test$Diff_L[1:ptnum]
+    test$New_Diff_L[(ptnum+1):(2*ptnum)]<-NA
+    test$New_Diff_U[1:ptnum]<-test$Diff_U[1:ptnum]
+    test$New_Diff_U[(ptnum+1):(2*ptnum)]<-NA
+    test$group<-c(rep("Model based", ptnum), rep("Raw data", ptnum))
+    test$textAE<-paste0(test$AEt, "/", test$Nt, " VS ", test$AEc, "/", test$Nc)
+    test$textAE[1:ptnum]<-NA
+
+    library(ggplot2)
+    # add the points at Mean
+    p<-ggplot(test, aes(x=New_Diff, y=yloc, shape=group))+geom_point(size=2)
+    # add line to shown confidence interval
+    p<-p+geom_segment(aes(x=New_Diff_L, xend=New_Diff_U, y=yloc, yend=yloc), size=1, na.rm=TRUE)
+
+    # add number of occurence on
+    p<-p+geom_text(aes(label=textAE, x=New_Diff+0.03, y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
+
+    # add title
+    p<-p+ggtitle(paste0("Top ", ptnum, " AE of mean risk difference plotted with 95% credible interval"))
+    p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
+
+    # ylable and x label
+    p<-p+xlab("Risk Difference")+ylab("PT")
+    p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
+
+    # x-axis coordinate and y-axis coordinate
+    p<-p + theme(axis.text.y = element_text(color = as.factor(test$SoC[1:ptnum]), size = 13))
+    p<-p + scale_y_continuous(breaks=seq(from=ptnum,to=1,by=-1),labels=test$PT[1:ptnum])
+    p<-p + theme(axis.text.x=element_text(size=13))
+
+    # legend size
+    p<-p+theme(legend.text = element_text(size=15), legend.title = element_blank())
+
+    return(p)
+
   }
 
   if (param=="odds ratio"){
 
     # first to get the top 10 AEs
-    test<-inputdata[order(inputdata[, "OR_mean"], decreasing=TRUE), ]
+    test<-inputdata[order(inputdata[, "OR_median"], decreasing=TRUE), ]
     test<-head(test, ptnum)
 
-    # create the x column for plotting
-    len<-dim(test)[1]
-    PT_lable<-test$PT[1:len]
-    test$x<-seq(1, len, by=1)
+    # change the name for plotting
+    setnames(test, old=c("OR_2.5%","OR_97.5%" ), new=c("OR_L","OR_U"))
 
-    # plot PT from same SOC in same color
-    test$Color<-NA
-    Soc1<-unique(test$b)
+    # create two set of test
+    test<-rbind(test, test)
 
-    for (iae in 1:ptnum){
-      # find the color for the PT
-      for (j in 1:length(Soc1)){
-        if (test[iae, "b"]==Soc1[j]) test[iae, "Color"]<-j
+    # create the y column for plotting
+    test$yloc <- c(seq(from=ptnum+0.15, to=1.15, by=-1), seq(ptnum-0.15, to=0.85, by=-1))
+
+    # create new column New_Diff, New_Diff_L, New_Diff_U
+    # with the data from model in above and data from Raw in bottom
+    test$New_OR[1:ptnum]<-test$OR_median[1:ptnum]
+    test$New_OR[(ptnum+1):(2*ptnum)]<-test$Raw_OR[(ptnum+1):(2*ptnum)]
+    test$New_OR_L[1:ptnum]<-test$OR_L[1:ptnum]
+    test$New_OR_L[(ptnum+1):(2*ptnum)]<-NA
+    test$New_OR_U[1:ptnum]<-test$OR_U[1:ptnum]
+    test$New_OR_U[(ptnum+1):(2*ptnum)]<-NA
+    test$group<-c(rep("Model based", ptnum), rep("Raw data", ptnum))
+    test$textAE<-paste0(test$AEt, "/", test$Nt, " VS ", test$AEc, "/", test$Nc)
+    test$textAE[1:ptnum]<-NA
+    # remove the Raw_OR that is Inf or out of the bounder of OR_xlim
+    for(i in (ptnum+1):(2*ptnum)){
+      if (test$New_OR[i]>OR_xlim[2]){
+        test$textAE[i-ptnum]<-NA
+        test$New_OR[i]<-NA
       }
     }
 
-    # change the name for plotting
-    setnames(test, old=c("OR_2.5%", "OR_97.5%" ), new=c("OR_L", "OR_U"))
+    TEST<-copy(test)
 
-    p <- ggplot(test, aes(x=x, y=OR_mean)) + geom_pointrange(aes(ymin=OR_L, ymax=OR_U)) + coord_cartesian(ylim = OR_ylim)
-    p1 <-p + labs(x = "Prefered Term",y="Odds ratio",title = paste0("Top ", ptnum, " AE of mean odds ratio plotted with 95% credible interval"))
+    library(ggplot2)
+    # add the points at Mean
+    p<-ggplot(test, aes(x=New_OR, y=yloc, shape=group))+geom_point(size=2, na.rm=TRUE) + coord_cartesian(xlim = OR_xlim)
+    # add line to shown confidence interval
+    p<-p+geom_segment(aes(x=New_OR_L, xend=New_OR_U, y=yloc, yend=yloc), size=1, na.rm=TRUE)
 
+    # add number of occurence on
+    p<-p+geom_text(aes(label=textAE, x=New_OR+((OR_xlim[2]-OR_xlim[1])/10), y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
 
-    p2 <- p1 + theme(axis.text.x = element_text(color = test$Color, size = 8, angle = 60, hjust = 1), axis.text.y = element_text(color = "black", size = 8))
-    p3 <- p2 + scale_x_continuous(breaks=seq(1,len,by=1),labels=PT_lable)
-    return(p3)
+    # add title
+    p<-p+ggtitle(paste0("Top ", ptnum, " AE of median odds ratio plotted with 95% credible interval"))
+    p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
+    # ylable and x label
+    p<-p+xlab("Risk Difference")+ylab("PT")
+    p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
+
+    # x-axis coordinate and y-axis coordinate
+    p<-p + theme(axis.text.y = element_text(color = as.factor(test$SoC[1:ptnum]), size = 13))
+    p<-p + scale_y_continuous(breaks=seq(from=ptnum,to=1,by=-1),labels=test$PT[1:ptnum])
+    p<-p + theme(axis.text.x=element_text(size=13))
+
+    # legend size
+    p<-p+theme(legend.text = element_text(size=15), legend.title = element_blank())
+
+    return(p)
   }
 }
+
 
 
 #########################################################################################################
@@ -507,7 +566,7 @@ Isingtable<-function(isingdata, ptnum=10, param="risk difference" ){
   if (param=="odds ratio"){
 
     # first to get the top 10 AEs
-    test<-inputdata[order(inputdata[, "OR_mean"], decreasing=TRUE), ]
+    test<-inputdata[order(inputdata[, "OR_median"], decreasing=TRUE), ]
     test<-head(test, ptnum)
   }
   return(test)

@@ -23,6 +23,8 @@ is the indicator for treatment and control group. TRTCTR=1 for treatment group a
 \emph{b}: integer represents each Soc \cr
 \emph{i}: integer represents each PT \cr
 \emph{j}: order of PT in each SoC \cr
+\emph{Raw_Risk_Diff}: Risk difference between treatment and control group
+\emph{Raw_OR}: Odds ratio of the risk treatment/control
 }
 \description{
 \code{preprocess} reorganizes the datasets by adverse events (AE), so that it can be used for further analysis.\cr

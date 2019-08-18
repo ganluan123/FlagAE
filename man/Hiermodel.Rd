@@ -107,7 +107,8 @@ Functions here are to take the orginized data (output from
   \strong{\code{Hier}}:\cr
   This function takes the same input as \code{Hier_history} and calculate the summary statistics
   for output from \code{Hier_history}.
-  It outputs the summary statistics for each AE, combining with raw data. \cr
+  It outputs the summary statistics for each AE, combining with raw data, and also the Raw risk difference, Raw odds ratio
+  calculated from raw data.\cr
   \strong{\code{Hiergetpi}}: \cr
   This function calculates pit (incidence of AE in treatment group) and
   pic (incidence of AE in control group) from the output of \code{Hier_history}
@@ -115,7 +116,7 @@ Functions here are to take the orginized data (output from
   \code{Hierplot} first selects the top \code{ptnum} (an integer) AE based on the selected statistic (either "odds ratio" or "risk difference").
   Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE. It shows the PTs of these AE from same SOC in same
   color.  \cr
-  \code{Isingtable} creates a table for the detailed information for AE plotted in \code{Hierplot}.
+  \code{Hiertable} creates a table for the detailed information for AE plotted in \code{Hierplot}.
 }
 \examples{
 \dontrun{
