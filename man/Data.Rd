@@ -6,7 +6,7 @@
 \alias{ADAE}
 \alias{ADSL}
 \title{Example dataset}
-\format{An object of class \code{data.frame} with 1014 rows and 3 columns.}
+\format{An object of class \code{data.frame} with 3187 rows and 3 columns.}
 \usage{
 data(ADAE)
 

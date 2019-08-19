@@ -457,7 +457,7 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_xlim=c(0,5)
     p<-p+geom_text(aes(label=textAE, x=New_Diff+0.03, y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
 
     # add title
-    p<-p+ggtitle(paste0("Top ", ptnum, " AE of mean risk difference plotted with 95% credible interval"))
+    p<-p+ggtitle(paste0("Top ", ptnum, " AE of mean risk difference \nplotted with 95% credible interval"))
     p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
     # ylable and x label
@@ -465,12 +465,13 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_xlim=c(0,5)
     p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
 
     # x-axis coordinate and y-axis coordinate
-    p<-p + theme(axis.text.y = element_text(color = as.factor(test$SoC[1:ptnum]), size = 13))
+    p<-p + theme(axis.text.y = element_text(color = as.factor(test$SoC[1:ptnum]), size = 13,angle=60, hjust = 1))
     p<-p + scale_y_continuous(breaks=seq(from=ptnum,to=1,by=-1),labels=test$PT[1:ptnum])
     p<-p + theme(axis.text.x=element_text(size=13))
 
     # legend size
-    p<-p+theme(legend.text = element_text(size=15), legend.title = element_blank())
+    p<-p+theme(legend.text = element_text(size=13), legend.title = element_blank(), legend.position = "bottom"
+               , legend.box = 'vertical', legend.background = element_rect(fill="lightblue"))
 
     return(p)
 
@@ -522,7 +523,7 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_xlim=c(0,5)
     p<-p+geom_text(aes(label=textAE, x=New_OR+((OR_xlim[2]-OR_xlim[1])/10), y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
 
     # add title
-    p<-p+ggtitle(paste0("Top ", ptnum, " AE of median odds ratio plotted with 95% credible interval"))
+    p<-p+ggtitle(paste0("Top ", ptnum, " AE of median odds ratio \nplotted with 95% credible interval"))
     p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
     # ylable and x label
@@ -530,12 +531,13 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_xlim=c(0,5)
     p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
 
     # x-axis coordinate and y-axis coordinate
-    p<-p + theme(axis.text.y = element_text(color = as.factor(test$SoC[1:ptnum]), size = 13))
+    p<-p + theme(axis.text.y = element_text(color = as.factor(test$SoC[1:ptnum]), size = 13,angle=60, hjust = 1))
     p<-p + scale_y_continuous(breaks=seq(from=ptnum,to=1,by=-1),labels=test$PT[1:ptnum])
     p<-p + theme(axis.text.x=element_text(size=13))
 
     # legend size
-    p<-p+theme(legend.text = element_text(size=15), legend.title = element_blank())
+    p<-p+theme(legend.text = element_text(size=13), legend.title = element_blank(), legend.position = "bottom"
+               , legend.box = 'vertical', legend.background = element_rect(fill="lightblue"))
 
     return(p)
   }

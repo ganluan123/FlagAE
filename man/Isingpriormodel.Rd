@@ -23,7 +23,7 @@ Ising(aedata, n_burn, n_iter, thin, alpha_ = 0.25, beta_ = 0.75,
 Isinggetpi(aedata, isingraw)
 
 Isingplot(isingdata, ptnum = 10, param = "risk difference",
-  OR_ylim = c(0, 5))
+  OR_xlim = c(0, 5))
 
 Isingtable(isingdata, ptnum = 10, param = "risk difference")
 }

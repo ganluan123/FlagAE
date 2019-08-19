@@ -7,7 +7,7 @@
 \title{Plot for two Bayesian models}
 \usage{
 HIplot(hierdata, isingdata, aedata, ptnum = 10,
-  param = "risk difference", OR_ylim = c(0, 5))
+  param = "risk difference", OR_xlim = c(0, 5))
 
 HItable(hierdata, isingdata, aedata, ptnum = 10,
   param = "risk difference")
@@ -28,8 +28,8 @@ default is "risk difference"}
 \code{HIplot} returns a plot for the top \code{ptnum} (an integer) AE based on the selected statistics (either "odds ratio" or "risk difference"). Mean, 2.5%
 quantile, 97.5% quantile of the selected statistics of these AE from both two models were plotted.
 \cr
-\code{HItable} returns a table for the detailed information for AE plotted in \code{HIplot}. It contains a new column, "rank_diff_mean" or "rank_OR_mean"
-(based on the \code{param}), besides the columns of output from \code{\link{Hier}} or \code{\link{Ising}}. This new column is the rank of "Diff_mean" or "OR_mean"
+\code{HItable} returns a table for the detailed information for AE plotted in \code{HIplot}. It contains a new column, "rank_diff_mean" or "rank_OR_median"
+(based on the \code{param}), besides the columns of output from \code{\link{Hier}} or \code{\link{Ising}}. This new column is the rank of "Diff_mean" or "OR_median"
 of the AE in each method.
 }
 \description{
@@ -54,10 +54,10 @@ HIERDATA<-Hier(aedata=AEdata, n_burn=1000, n_iter=1000, thin=20, n_adapt=1000, n
 
 # run the Ising model
 ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5, beta_=0.5,
-                           alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
+                           alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=1, theta=0.02)
 
 HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
-HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio")
+HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio", OR_xlim=c(0,20))
 
 HItable(hierdata=HIERDATA, isingdata=ISINGDATA)
 HItable(hierdata=HIERDATA, isingdata=ISINGDATA, ptnum=15, param="odds ratio")

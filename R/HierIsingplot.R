@@ -15,8 +15,8 @@
 #' \code{HIplot} returns a plot for the top \code{ptnum} (an integer) AE based on the selected statistics (either "odds ratio" or "risk difference"). Mean, 2.5%
 #' quantile, 97.5% quantile of the selected statistics of these AE from both two models were plotted.
 #' \cr
-#' \code{HItable} returns a table for the detailed information for AE plotted in \code{HIplot}. It contains a new column, "rank_diff_mean" or "rank_OR_mean"
-#' (based on the \code{param}), besides the columns of output from \code{\link{Hier}} or \code{\link{Ising}}. This new column is the rank of "Diff_mean" or "OR_mean"
+#' \code{HItable} returns a table for the detailed information for AE plotted in \code{HIplot}. It contains a new column, "rank_diff_mean" or "rank_OR_median"
+#' (based on the \code{param}), besides the columns of output from \code{\link{Hier}} or \code{\link{Ising}}. This new column is the rank of "Diff_mean" or "OR_median"
 #' of the AE in each method.
 #'
 #' @param ptnum positive integer, number of AEs to be selected or plotted, default is 10
@@ -40,10 +40,10 @@
 #'
 #' # run the Ising model
 #' ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5, beta_=0.5,
-#'                            alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
+#'                            alpha.t=0.5, beta.t=0.5, alpha.c=0.25, beta.c=0.75, rho=1, theta=0.02)
 #'
 #' HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
-#' HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio")
+#' HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio", OR_xlim=c(0,20))
 #'
 #' HItable(hierdata=HIERDATA, isingdata=ISINGDATA)
 #' HItable(hierdata=HIERDATA, isingdata=ISINGDATA, ptnum=15, param="odds ratio")
@@ -102,13 +102,13 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     # 2 for PT in Ising model
     test_Intsect<-inputdata[which(inputdata$PT %in% PT_Intsect),]
     test_Intsect$Ind<-"A"
-    test_Intsect$Set<-"Intersect of both models"
+    test_Intsect$Set<-"Both models"
     test_Hier_Uni<-inputdata[which(inputdata$PT %in% PT_Hier_Uni),]
     test_Hier_Uni$Ind<-"B"
-    test_Hier_Uni$Set<-"Unique in Hierarchical Model"
+    test_Hier_Uni$Set<-"Hierarchical Model"
     test_Is_Uni<-inputdata[which(inputdata$PT %in% PT_Is_Uni),]
     test_Is_Uni$Ind<-"C"
-    test_Is_Uni$Set<-"Unique in Ising prior"
+    test_Is_Uni$Set<-"Ising prior model"
 
     # combine the dataset together
     test<-rbind(test_Intsect, test_Hier_Uni)
@@ -121,6 +121,8 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
 
     # sort the test by Method, Ind, and -Diff_mean
     test<-test[order(test$Method, test$Ind, -test$Diff_mean),]
+    # change the name of the method, make it simplier
+    test[test$Method=='Bayesian Hierarchical Model', 'Method']<-'Hierarchical Model'
     # add half of test to the end
     temptest<-copy(test[1:(dim(test)[1]/2),])
     temptest$Method<-"Raw Data"
@@ -157,7 +159,7 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     p<-p+geom_text(aes(label=textAE, x=New_Diff+0.03, y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
 
     # add title
-    p<-p+ggtitle(paste0("Top ", ptnum, " AE of mean risk difference "))
+    p<-p+ggtitle(paste0("Top ", ptnum, " AE of mean risk difference"))
     p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
     # ylable and x label
@@ -165,13 +167,14 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
 
     # x-axis coordinate and y-axis coordinate
-    p<-p + theme(axis.text.y = element_text(color = as.factor(test$category), size = 13))
+    p<-p + theme(axis.text.y = element_text(color = as.factor(test$category), size = 13,angle=60, hjust = 1))
     # p<-p + theme(axis.text.y = element_text(color = as.factor(test$PT[1:N]), size = 13))
     p<-p + scale_y_continuous(breaks=seq(from=N*1.5,to=1.5,by=-1.5),labels=test$PT[1:N])
     p<-p + theme(axis.text.x=element_text(size=13))
 
     # legend size
-    p<-p+theme(legend.text = element_text(size=15), legend.title = element_blank())
+    p<-p+theme(legend.text = element_text(size=13), legend.title = element_blank(),legend.position = "bottom",
+               legend.box = 'vertical', legend.background = element_rect(fill="lightblue"))
 
     return(p)
   }
@@ -267,7 +270,7 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     p<-p+geom_text(aes(label=textAE, x=New_OR+((OR_xlim[2]-OR_xlim[1])/10), y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
 
     # add title
-    p<-p+ggtitle(paste0("Top ", ptnum, " AE of median odds ratio "))
+    p<-p+ggtitle(paste0("Top ", ptnum, " AE of median odds ratio"))
     p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
     # ylable and x label
@@ -275,13 +278,14 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
 
     # x-axis coordinate and y-axis coordinate
-    p<-p + theme(axis.text.y = element_text(color = as.factor(test$category), size = 13))
+    p<-p + theme(axis.text.y = element_text(color = as.factor(test$category), size = 13,angle=60, hjust = 1))
     # p<-p + theme(axis.text.y = element_text(color = as.factor(test$PT[1:N]), size = 13))
     p<-p + scale_y_continuous(breaks=seq(from=N*1.5,to=1.5,by=-1.5),labels=test$PT[1:N])
     p<-p + theme(axis.text.x=element_text(size=13))
 
     # legend size
-    p<-p+theme(legend.text = element_text(size=15), legend.title = element_blank())
+    p<-p+theme(legend.text = element_text(size=13), legend.title = element_blank(), legend.position = "bottom"
+               , legend.box = 'vertical', legend.background = element_rect(fill="lightblue"))
 
     return(p)
   }
@@ -316,8 +320,8 @@ HItable<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" 
 
   if (param=="risk difference"){
 
-    # delete column 'Raw_OR', "OR_mean", "OR_2.5%", "OR_97.5%"
-    drops2<-c("Raw_OR","OR_mean", "OR_2.5%", "OR_97.5%")
+    # delete column 'Raw_OR', "OR_median", "OR_2.5%", "OR_97.5%"
+    drops2<-c("Raw_OR","OR_median", "OR_2.5%", "OR_97.5%")
     inputdata<-inputdata[, !names(inputdata) %in% drops2]
 
     # create a new column which indicates the rank of AE based on mean of risk difference in each method
@@ -361,19 +365,19 @@ HItable<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" 
     inputdata<-inputdata[, !names(inputdata) %in% drops2]
 
     # create a new column which indicates the rank of AE based on mean of risk difference in each method
-    inputdata$rank_OR_mean<-NA
+    inputdata$rank_OR_median<-NA
 
     # rank in Hierarchical model
     test1_Hier<-subset(inputdata, Method=="Bayesian Hierarchical Model")
-    test1_Hier$rank_OR_mean<-as.integer(dim(test1_Hier)[1]-rank(test1_Hier$OR_mean)+1)
-    test1_Hier<-test1_Hier[order(test1_Hier$rank_OR_mean), ]
+    test1_Hier$rank_OR_median<-as.integer(dim(test1_Hier)[1]-rank(test1_Hier$OR_median)+1)
+    test1_Hier<-test1_Hier[order(test1_Hier$rank_OR_median), ]
     # get the top ptnum AE in Hierarchical model
     test2_Hier<-head(test1_Hier, ptnum)
 
     # rank in Ising model
     test1_Is<-subset(inputdata, Method=="Ising prior")
-    test1_Is$rank_OR_mean<-as.integer(dim(test1_Is)[1]-rank(test1_Is$OR_mean)+1)
-    test1_Is<-test1_Is[order(test1_Is$rank_OR_mean), ]
+    test1_Is$rank_OR_median<-as.integer(dim(test1_Is)[1]-rank(test1_Is$OR_median)+1)
+    test1_Is<-test1_Is[order(test1_Is$rank_OR_median), ]
     # get the top ptnum AE in Ising prior model
     test2_Is<-head(test1_Is, ptnum)
 
@@ -391,7 +395,7 @@ HItable<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" 
 
     # get the table of PT in topPTs
     Outputtable<-test1[test1$PT %in% topPTs, ]
-    Outputtable<-Outputtable[order(Outputtable[, "Method"], Outputtable[,"rank_OR_mean"]), ]
+    Outputtable<-Outputtable[order(Outputtable[, "Method"], Outputtable[,"rank_OR_median"]), ]
   }
   return(Outputtable)
 }
