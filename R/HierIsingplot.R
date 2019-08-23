@@ -77,6 +77,7 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     # first to get the top 10 AEs from each method
     test1_Hier<-subset(inputdata, Method=="Bayesian Hierarchical Model")
     test2_Hier<-test1_Hier[order(test1_Hier[, "Diff_mean"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test2_Hier)[1])
     test3_Hier<-head(test2_Hier, ptnum)
 
     test1_Is<-subset(inputdata, Method=="Ising prior")
@@ -146,17 +147,17 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
 
 
     # create yloc for the location of the plot
-    test$yloc<-c(seq(from=1.5*N+0.3, to=1.5+0.3, by=-1.5), seq(from=1.5*N+0.15, to=1.5+0.15, by=-1.5),
+    test$yloc<-c(seq(from=1.5*N+0.5, to=1.5+0.5, by=-1.5), seq(from=1.5*N+0.25, to=1.5+0.25, by=-1.5),
                  seq(from=1.5*N, to=1.5, by=-1.5))
 
     library(ggplot2)
     # add the points at Mean
     p<-ggplot(test, aes(x=New_Diff, y=yloc, shape=Method, color=Set))+geom_point(size=2)
     # add line to shown confidence interval
-    p<-p+geom_segment(aes(x=Diff_L, xend=Diff_U, y=yloc, yend=yloc, color=Set), size=1, na.rm=TRUE)
+    p<-p+geom_segment(aes(x=Diff_L, xend=Diff_U, y=yloc, yend=yloc, color=Set), size=0.6, na.rm=TRUE)
 
     # add number of occurence on
-    p<-p+geom_text(aes(label=textAE, x=New_Diff+0.03, y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
+    p<-p+geom_text(aes(label=textAE, x=New_Diff+0.1, y=yloc), size=2, show.legend = FALSE, na.rm = TRUE)
 
     # add title
     p<-p+ggtitle(paste0("Top ", ptnum, " AE of mean risk difference"))
@@ -183,6 +184,7 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     # first to get the top 10 AEs from each method
     test1_Hier<-subset(inputdata, Method=="Bayesian Hierarchical Model")
     test2_Hier<-test1_Hier[order(test1_Hier[, "OR_median"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test2_Hier)[1])
     test3_Hier<-head(test2_Hier, ptnum)
 
     test1_Is<-subset(inputdata, Method=="Ising prior")
@@ -249,7 +251,7 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     setnames(test, old=c("OR_2.5%","OR_97.5%" ), new=c("OR_L","OR_U"))
 
     # create yloc for the location of the plot
-    test$yloc<-c(seq(from=1.5*N+0.3, to=1.5+0.3, by=-1.5), seq(from=1.5*N+0.15, to=1.5+0.15, by=-1.5),
+    test$yloc<-c(seq(from=1.5*N+0.5, to=1.5+0.5, by=-1.5), seq(from=1.5*N+0.25, to=1.5+0.25, by=-1.5),
                  seq(from=1.5*N, to=1.5, by=-1.5))
 
     # remove the Raw_OR that is Inf or out of the bounder of OR_xlim
@@ -264,17 +266,17 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     # add the points at Mean
     p<-ggplot(test, aes(x=New_OR, y=yloc, shape=Method, color=Set))+geom_point(size=2, na.rm=TRUE)+ coord_cartesian(xlim = OR_xlim)
     # add line to shown confidence interval
-    p<-p+geom_segment(aes(x=OR_L, xend=OR_U, y=yloc, yend=yloc, color=Set), size=1, na.rm=TRUE)
+    p<-p+geom_segment(aes(x=OR_L, xend=OR_U, y=yloc, yend=yloc, color=Set), size=0.6, na.rm=TRUE)
 
     # add number of occurence on
-    p<-p+geom_text(aes(label=textAE, x=New_OR+((OR_xlim[2]-OR_xlim[1])/10), y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
+    p<-p+geom_text(aes(label=textAE, x=New_OR+((OR_xlim[2]-OR_xlim[1])/10), y=yloc), size=2, show.legend = FALSE, na.rm = TRUE)
 
     # add title
     p<-p+ggtitle(paste0("Top ", ptnum, " AE of median odds ratio"))
     p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
     # ylable and x label
-    p<-p+xlab("Risk Difference")+ylab("PT")
+    p<-p+xlab("Odds ratio")+ylab("PT")
     p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
 
     # x-axis coordinate and y-axis coordinate
@@ -332,6 +334,7 @@ HItable<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" 
     test1_Hier$rank_diff_mean<-as.integer(dim(test1_Hier)[1]-rank(test1_Hier$Diff_mean)+1)
     test1_Hier<-test1_Hier[order(test1_Hier$rank_diff_mean), ]
     # get the top ptnum AE in Hierarchical model
+    ptnum<-min(ptnum, dim(test1_Hier)[1])
     test2_Hier<-head(test1_Hier, ptnum)
 
     # rank in Ising model
@@ -372,6 +375,7 @@ HItable<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" 
     test1_Hier$rank_OR_median<-as.integer(dim(test1_Hier)[1]-rank(test1_Hier$OR_median)+1)
     test1_Hier<-test1_Hier[order(test1_Hier$rank_OR_median), ]
     # get the top ptnum AE in Hierarchical model
+    ptnum<-min(ptnum, dim(test1_Hier)[1])
     test2_Hier<-head(test1_Hier, ptnum)
 
     # rank in Ising model

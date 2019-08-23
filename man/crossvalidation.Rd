@@ -28,11 +28,6 @@ CVising(AElist, n_burn, n_iter, thin, alpha_ = 0.25, beta_ = 0.75,
 
 \item{PI}{output from function \code{\link{Hiergetpi}} or \code{\link{Isinggetpi}}}
 
-\item{adsl}{subject level analysis dataset, it is a .csv file, it has to contain at least two columns, "USUBJID" and "TRTCTR", "TRTCTR"
-is the indicator for treatment and control group. TRTCTR=1 for treatment group and TRTCTR=0 for control group.}
-
-\item{adae}{adverse event analysis dataset, it is a .csv file, it has to contain at least three columns, "USUBJID", "AEBODSYS",and "AEDECOD"}
-
 \item{k}{interger, the number of folds used to split the dataset for cross validation}
 
 \item{n_burn}{number of burn in for Gibbs Sampling}

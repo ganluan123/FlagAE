@@ -96,6 +96,10 @@
 #' Isingplot(ISINGDATA, ptnum=15, param="odds ratio", OR_ylim=c(1,10))
 #' ISINGTABLE<-Isingtable(ISINGDATA)
 #' ISINGTABLE2<-Isingtable(ISINGDATA, ptnum=15, param="odds ratio")
+#'
+#' Compareplot(ISINGDATA)
+#' # user can use a very big number(bigger than total PTs in dataset) to plot out all the PTs
+#' Compareplot(ISINGDATA, ptnum=5000, param='odds ratio')
 #' }
 #'
 #' @seealso
@@ -297,6 +301,9 @@ sum_Ising <- function(isingraw) {
   log.or.LL <- apply(log(isingraw$pi.t/(1-isingraw$pi.t))-log(isingraw$pi.c/(1-isingraw$pi.c)),2,quantile,probs=0.025) # lower 2.5% quantile of log odds ratio
   log.or.UL <- apply(log(isingraw$pi.t/(1-isingraw$pi.t))-log(isingraw$pi.c/(1-isingraw$pi.c)),2,quantile,probs=0.975) # upper 2.5% quantile of log odds ratio
   rd <- apply(isingraw$pi.t-isingraw$pi.c,2,mean) # difference of pi.t and pi.c, incidence rate difference
+  # rd <- apply(isingraw$pi.t,2,mean)
+  # rd <- apply(isingraw$pi.c,2,mean)
+  # rd <- apply(isingraw$pi.t-isingraw$pi.c,2,quantile,probs=0.5)
   rd.LL <- apply(isingraw$pi.t-isingraw$pi.c,2,quantile,probs=0.025) # lower 2.5% quantile of incidence rate difference
   rd.UL <- apply(isingraw$pi.t-isingraw$pi.c,2,quantile,probs=0.975) # upper 2.5% quantile of incidicen rate difference
 
@@ -424,6 +431,7 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_xlim=c(0,5)
 
     # first to get the top 10 AEs
     test<-inputdata[order(inputdata[, "Diff_mean"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test)[1])
     test<-head(test, ptnum)
 
     # change the name for plotting
@@ -454,7 +462,7 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_xlim=c(0,5)
     p<-p+geom_segment(aes(x=New_Diff_L, xend=New_Diff_U, y=yloc, yend=yloc), size=1, na.rm=TRUE)
 
     # add number of occurence on
-    p<-p+geom_text(aes(label=textAE, x=New_Diff+0.03, y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
+    p<-p+geom_text(aes(label=textAE, x=New_Diff+0.1, y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
 
     # add title
     p<-p+ggtitle(paste0("Top ", ptnum, " AE of mean risk difference \nplotted with 95% credible interval"))
@@ -481,6 +489,7 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_xlim=c(0,5)
 
     # first to get the top 10 AEs
     test<-inputdata[order(inputdata[, "OR_median"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test)[1])
     test<-head(test, ptnum)
 
     # change the name for plotting
@@ -527,7 +536,7 @@ Isingplot<-function(isingdata, ptnum=10, param="risk difference", OR_xlim=c(0,5)
     p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
     # ylable and x label
-    p<-p+xlab("Risk Difference")+ylab("PT")
+    p<-p+xlab("Odds ratio")+ylab("PT")
     p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
 
     # x-axis coordinate and y-axis coordinate
@@ -562,6 +571,7 @@ Isingtable<-function(isingdata, ptnum=10, param="risk difference" ){
 
     # first to get the top 10 AEs
     test<-inputdata[order(inputdata[, "Diff_mean"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test)[1])
     test<-head(test, ptnum)
   }
 
@@ -569,6 +579,7 @@ Isingtable<-function(isingdata, ptnum=10, param="risk difference" ){
 
     # first to get the top 10 AEs
     test<-inputdata[order(inputdata[, "OR_median"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test)[1])
     test<-head(test, ptnum)
   }
   return(test)

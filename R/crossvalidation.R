@@ -291,7 +291,8 @@ CVhier<-function(AElist, n_burn, n_iter, thin, n_adapt, n_chain,
   trainloss<-0
   testloss<-0
 
-
+  library(foreach)
+  library(doParallel)
   cores=detectCores()
   cl<-makeCluster(cores[1]-1)
   registerDoParallel(cl)

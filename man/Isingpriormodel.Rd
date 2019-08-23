@@ -137,6 +137,10 @@ Isingplot(ISINGDATA)
 Isingplot(ISINGDATA, ptnum=15, param="odds ratio", OR_ylim=c(1,10))
 ISINGTABLE<-Isingtable(ISINGDATA)
 ISINGTABLE2<-Isingtable(ISINGDATA, ptnum=15, param="odds ratio")
+
+Compareplot(ISINGDATA)
+# user can use a very big number(bigger than total PTs in dataset) to plot out all the PTs
+Compareplot(ISINGDATA, ptnum=5000, param='odds ratio')
 }
 
 }

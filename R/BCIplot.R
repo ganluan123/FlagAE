@@ -84,6 +84,7 @@ BCIplot <- function(aedata, ptnum=10, conf.level=0.95) {
   pdat <- data.frame(lapply(aedata1, as.character), stringsAsFactors=FALSE)
 
   # get the top ptnum AE by risk difference
+  ptnum<-min(ptnum, dim(pdat)[1])
   pdat <- head(pdat, ptnum)
 
   # stack two pdat together
@@ -112,12 +113,13 @@ BCIplot <- function(aedata, ptnum=10, conf.level=0.95) {
   p<-ggplot(pdat, aes(x=Mean, y=yloc))+geom_point(size=2)
   # add line to shown confidence interval
   p<-p+geom_segment(aes(x=lb, xend=ub, y=yloc, yend=yloc, linetype=group), size=1)
+  p<-p+scale_linetype_manual(values=c("twodash", "solid"))
 
   # add number of occurence on
   p<-p+geom_text(aes(label=textAE, x=(ub+Mean)/2, y=yloc+0.15), size=3, show.legend = FALSE)
 
   # add title
-  p<-p+ggtitle(paste0("Confidence interval of top ", ptnum, " AEs \nin difference by treatment group"))
+  p<-p+ggtitle(paste0("Confidence interval of top ", ptnum, " AEs \nof risk difference by treatment group"))
   p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
   # ylable and x label
@@ -128,7 +130,8 @@ BCIplot <- function(aedata, ptnum=10, conf.level=0.95) {
   p<-p + theme(axis.text.y = element_text(color = as.factor(pdat$b[1:ptnum]), size = 13,angle=60, hjust = 1))
   # p<-p + theme(axis.text.y = element_text(color = as.factor(pdat$b[1:ptnum]), size = 13))
   p<-p + scale_y_continuous(breaks=seq(from=ptnum,to=1,by=-1),labels=pdat$AEDECOD[1:ptnum])
-  p<-p + theme(axis.text.x=element_text(size=13))
+  p<-p + theme(axis.text.x=element_text(size=15))
+
 
   # legend size
   p<-p+theme(legend.text = element_text(size=13), legend.title = element_blank(), legend.position = "bottom"
@@ -172,6 +175,7 @@ BCItable<-function(aedata, ptnum=10, conf.level=0.95){
   pdat<-pdat[, !names(pdat) %in% drops]
 
   # return the AE with top ptnum mean difference
+  ptnum<-min(ptnum, dim(pdat)[1])
   head(pdat, ptnum)
 }
 

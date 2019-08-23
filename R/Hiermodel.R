@@ -22,6 +22,7 @@
 #' @param param a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 #' default is "risk difference"
 #' @param OR_ylim a numeric vector of two elements, used to set y-axis limit for plotting based on "odds ratio"
+#' @param modeldata output from function \code{Hier} or \code{\link{Ising}}
 #'
 #'
 #' @details \strong{Model}: \cr Here the 3-stage hierarchical bayesian model was
@@ -61,6 +62,8 @@
 #'   Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE. It shows the PTs of these AE from same SOC in same
 #'   color.  \cr
 #'   \code{Hiertable} creates a table for the detailed information for AE plotted in \code{Hierplot}.
+#'   \code{Compareplot} creates a plot to compare the mean risk difference (or odds ratio meadian) from posterior distribution with raw
+#'   risk difference (or row risk difference) from raw data. This function can be used for both bayesian models.
 #'
 #'
 #'
@@ -99,6 +102,10 @@
 #' Hierplot(HIERDATA, ptnum=15, param="odds ratio")
 #' HIERTABLE<-Hiertable(HIERDATA)
 #' HIERTABLE2<-Hiertable(HIERDATA, ptnum=15, param="odds ratio")
+#'
+#' Compareplot(HIERDATA)
+#' # user can use a very big number(bigger than total PTs in dataset) to plot out all the PTs
+#' COmpareplot(HIERDATA, ptnum=5000, param='odds ratio')
 #' }
 #'
 #' @seealso
@@ -430,6 +437,7 @@ Hierplot<-function(hierdata, ptnum=10, param="risk difference", OR_xlim=c(0,5) )
 
     # first to get the top 10 AEs
     test<-inputdata[order(inputdata[, "Diff_mean"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test)[1])
     test<-head(test, ptnum)
 
     # change the name for plotting
@@ -460,7 +468,7 @@ Hierplot<-function(hierdata, ptnum=10, param="risk difference", OR_xlim=c(0,5) )
     p<-p+geom_segment(aes(x=New_Diff_L, xend=New_Diff_U, y=yloc, yend=yloc), size=1, na.rm=TRUE)
 
     # add number of occurence on
-    p<-p+geom_text(aes(label=textAE, x=New_Diff+0.03, y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
+    p<-p+geom_text(aes(label=textAE, x=New_Diff+0.1, y=yloc), size=3, show.legend = FALSE, na.rm = TRUE)
 
     # add title
     p<-p+ggtitle(paste0("Top ", ptnum, " AE of mean risk difference \nplotted with 95% credible interval"))
@@ -487,6 +495,7 @@ Hierplot<-function(hierdata, ptnum=10, param="risk difference", OR_xlim=c(0,5) )
 
     # first to get the top 10 AEs
     test<-inputdata[order(inputdata[, "OR_median"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test)[1])
     test<-head(test, ptnum)
 
     # change the name for plotting
@@ -533,7 +542,7 @@ Hierplot<-function(hierdata, ptnum=10, param="risk difference", OR_xlim=c(0,5) )
     p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
 
     # ylable and x label
-    p<-p+xlab("Risk Difference")+ylab("PT")
+    p<-p+xlab("Odds ratio")+ylab("PT")
     p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
 
     # x-axis coordinate and y-axis coordinate
@@ -568,6 +577,7 @@ Hiertable<-function(hierdata, ptnum=10, param="risk difference" ){
 
     # first to get the top 10 AEs
     test<-inputdata[order(inputdata[, "Diff_mean"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test)[1])
     test<-head(test, ptnum)
   }
 
@@ -575,10 +585,73 @@ Hiertable<-function(hierdata, ptnum=10, param="risk difference" ){
 
     # first to get the top 10 AEs
     test<-inputdata[order(inputdata[, "OR_median"], decreasing=TRUE), ]
+    ptnum<-min(ptnum, dim(test)[1])
     test<-head(test, ptnum)
   }
   return(test)
 }
 
+#########################################################################################################
+#########################################################################################################
+
+#' @rdname Hiermodel
+#' @export
+Compareplot<-function(modeldata, ptnum=50, param='risk difference' ){
+  # modeldata is either the result from function 'Hier' or 'Ising'
+  # ptnum is how many adverse events user wants to plot out
+  # param is to determine which statistics used to show the plot,
+  # either 'risk differene' or 'odds ratio'
+  #
+  if(param=='risk difference'){
+    library(data.table)
+    library(ggplot2)
+    # reoder modeldata by model based risk difference
+    modeldata<-modeldata[order(-modeldata$Diff_mean), ]
+    if(ptnum>(dim(modeldata)[1])) ptnum<-dim(modeldata)[1]
+    #test<-copy(modeldata[1:ptnum, c("Diff_mean", "Raw_Risk_Diff")])
+    test<-copy(modeldata[1:ptnum, ])
+    # test$pi.t<-test$AEt/test$Nt
+    # test$pi.c<-test$AEc/test$Nc
+    test$x<-1:ptnum
+    cols <- c("Model based"="#f04546","Raw data"="#3591d1")
+    p<-ggplot(test, aes(x))+geom_point(aes(y=Diff_mean, colour="Model based"))
+    p<-p+geom_point(aes(y=Raw_Risk_Diff, colour="Raw data"))
+    p<-p+scale_colour_manual(name="data",values=cols)
+
+    # p<-ggplot(test, aes(x))+geom_point(aes(y=Diff_mean, colour="Model based"))+geom_point(aes(y=Raw_Risk_Diff, colour='Raw data'))
+    # p<-p+geom_line(aes(y=Diff_mean, colour="Model based"))+geom_line(aes(y=Raw_Risk_Diff, colour='Raw data'))
+    p<-p+theme(legend.text = element_text(size=13), legend.title = element_blank(), legend.position = "bottom"
+               , legend.background = element_rect(fill="lightblue"))
+    if(modeldata$Method[1]=='Ising prior') Model<-'Ising prior model'
+    if(modeldata$Method[1]=='Bayesian Hierarchical Model') Model<-'hierarchical model'
+    p<-p+ggtitle(paste0('Risk difference from ', Model,' and raw data'))
+    p<-p+xlab("PT")+ylab('Risk difference')
+  }
+
+  if(param=='odds ratio'){
+    library(data.table)
+    library(ggplot2)
+    # reoder modeldata by model based risk difference
+    modeldata<-modeldata[order(-modeldata$OR_median), ]
+    if(ptnum>(dim(modeldata)[1])) ptnum<-dim(modeldata)[1]
+    test<-copy(modeldata[1:ptnum, ])
+    test$x<-1:ptnum
+    cols <- c("Model based"="#f04546","Raw data"="#3591d1")
+    p<-ggplot(test, aes(x))+geom_point(aes(y=OR_median, colour="Model based"))+geom_point(aes(y=Raw_OR, colour='Raw data'))
+    p<-p+scale_colour_manual(name="data",values=cols)
+    # p<-p+geom_line(aes(y=OR_median, colour="Model based"))+geom_line(aes(y=Raw_OR, colour='Raw data'))
+    p<-p+theme(legend.text = element_text(size=13), legend.title = element_blank(), legend.position = "bottom"
+               , legend.background = element_rect(fill="lightblue"))
+    if(modeldata$Method[1]=='Ising prior') Model<-'Ising prior model'
+    if(modeldata$Method[1]=='Bayesian Hierarchical Model') Model<-'hierarchical model'
+    p<-p+ggtitle(paste0('Odds ratio from ', Model,' and raw data'))
+    p<-p+xlab("PT")+ylab('Odds ratio')
+  }
+
+  p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
+  p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
+  p<-p + theme(axis.text.x=element_text(size=15)) + theme(axis.text.y=element_text(size=15))
+  return(p)
+}
 
 

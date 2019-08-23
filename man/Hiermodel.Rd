@@ -8,6 +8,7 @@
 \alias{Hiergetpi}
 \alias{Hierplot}
 \alias{Hiertable}
+\alias{Compareplot}
 \title{Three stages Bayesian Hierarchical Model}
 \usage{
 Hier_history(aedata, n_burn, n_iter, thin, n_adapt, n_chain,
@@ -32,6 +33,8 @@ Hierplot(hierdata, ptnum = 10, param = "risk difference",
   OR_xlim = c(0, 5))
 
 Hiertable(hierdata, ptnum = 10, param = "risk difference")
+
+Compareplot(modeldata, ptnum = 50, param = "risk difference")
 }
 \arguments{
 \item{aedata}{output from function \code{\link{preprocess}}}
@@ -52,6 +55,8 @@ Hiertable(hierdata, ptnum = 10, param = "risk difference")
 
 \item{param}{a string, either "odds ratio" or "risk difference", indicate which summary statistic to be based on to plot the top AEs,
 default is "risk difference"}
+
+\item{modeldata}{output from function \code{Hier} or \code{\link{Ising}}}
 
 \item{alpha.gamma...}{alpha.gamma and other parameters are hyperparameters for prior distribution,
 see the reference for the meaning of each parameters}
@@ -117,6 +122,8 @@ Functions here are to take the orginized data (output from
   Then it plots the mean, 2.5% quantile, 97.5% quantile of the selected statistic of these AE. It shows the PTs of these AE from same SOC in same
   color.  \cr
   \code{Hiertable} creates a table for the detailed information for AE plotted in \code{Hierplot}.
+  \code{Compareplot} creates a plot to compare the mean risk difference (or odds ratio meadian) from posterior distribution with raw
+  risk difference (or row risk difference) from raw data. This function can be used for both bayesian models.
 }
 \examples{
 \dontrun{
@@ -137,6 +144,10 @@ Hierplot(HIERDATA)
 Hierplot(HIERDATA, ptnum=15, param="odds ratio")
 HIERTABLE<-Hiertable(HIERDATA)
 HIERTABLE2<-Hiertable(HIERDATA, ptnum=15, param="odds ratio")
+
+Compareplot(HIERDATA)
+# user can use a very big number(bigger than total PTs in dataset) to plot out all the PTs
+COmpareplot(HIERDATA, ptnum=5000, param='odds ratio')
 }
 
 }

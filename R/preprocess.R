@@ -1,16 +1,20 @@
-#' @name preprocess
+#' @name PREPROCESS
 #'
 #' @title  Raw data process
 #'
 #' @description
 #' \code{preprocess} reorganizes the datasets by adverse events (AE), so that it can be used for further analysis.\cr
+#' \code{PREplot} plot the risk difference or odds ratio calculated from Raw data.
 #'
 #'
 #'
 #' @details
 #' \code{preprocess} sums up the number of patients in control and treatment group.
 #' Also this function calculates the number of patients
-#' experiencing the AE for each AE in control and treatment group. It also contains columns, "b", "i", "j" for further analysis.
+#' experiencing the AE for each AE in control and treatment group. It also contains columns, "b", "i", "j" for further analysis.\cr
+#' \code{PREplot} calculate the risk difference or odds ratio from Raw data and plot top AEs with highest raw risk difference or with highest
+#' odds ratio. User can select which summary statistics('risk difference' or 'odds ratio') the plot the based on and also the number
+#' of adverse events to plot out.
 #'
 #' @return
 #' \code{preprocess} returns a dataframe with following columnss:\cr
@@ -23,18 +27,24 @@
 #' \emph{b}: integer represents each Soc \cr
 #' \emph{i}: integer represents each PT \cr
 #' \emph{j}: order of PT in each SoC \cr
-#' \emph{Raw_Risk_Diff}: Risk difference between treatment and control group
+#' \emph{Raw_Risk_Diff}: Risk difference between treatment and control group \cr
 #' \emph{Raw_OR}: Odds ratio of the risk treatment/control
 #'
 #' @param adsl subject level analysis dataset, it is a .csv file, it has to contain at least two columns, "USUBJID" and "TRTCTR", "TRTCTR"
 #' is the indicator for treatment and control group. TRTCTR=1 for treatment group and TRTCTR=0 for control group.
 #' @param adae adverse event analysis dataset, it is a .csv file, it has to contain at least three columns, "USUBJID", "AEBODSYS",and "AEDECOD"
+#' @param aedata the output dataset from function \code{preprocess}
+#' @param ptnum an integer, number of PTs to plot, with default be 50
+#' @param param a string, summary statistics based for plotting, either 'risk difference' or 'odds ratio', with default be 'risk difference'
 #'
 #' @examples
 #' \dontrun{
 #' data(ADAE)
 #' data(ADSL)
-#' preprocess(adsl=ADSL, adae=ADAE)
+#' AEdata<-preprocess(adsl=ADSL, adae=ADAE)
+#' PREplot(aedata=AEdata)
+#' # user can use a very big number(bigger than total PTs in dataset) to plot out all the PTs
+#' PREplot(aedata=AEdata, ptnum=50000, param='odds ratio')
 #' }
 #'
 #' @note
@@ -121,4 +131,45 @@ preprocess<-function(adsl, adae){
 
   # return the dataframe
   return (Tdat2)
+}
+
+
+#########################################################################################################
+#########################################################################################################
+
+#' @rdname PREPROCESS
+#' @export
+PREplot<-function(aedata, ptnum=50, param='risk difference'){
+  if(param=='risk difference'){
+    library(data.table)
+    library(ggplot2)
+    # reoder aedata by model based risk difference
+    aedata<-aedata[order(-aedata$Raw_Risk_Diff), ]
+    if(ptnum>(dim(aedata)[1])) ptnum<-dim(aedata)[1]
+    test<-copy(aedata[1:ptnum, ])
+    test$x<-1:ptnum
+    p<-ggplot(test, aes(x))+geom_point(aes(y=Raw_Risk_Diff),colour='#3591d1')
+    p<-p+theme(legend.title=element_blank())
+    p<-p+ggtitle(paste0('Risk difference from raw data'))
+    p<-p+xlab("PT")+ylab('Risk difference')
+
+  }
+
+  if(param=='odds ratio'){
+    library(data.table)
+    library(ggplot2)
+    # reoder aedata by model based odds ratio
+    aedata<-aedata[order(-aedata$Raw_OR), ]
+    if(ptnum>(dim(aedata)[1])) ptnum<-dim(aedata)[1]
+    test<-copy(aedata[1:ptnum, ])
+    test$x<-1:ptnum
+    p<-ggplot(test, aes(x))+geom_point(aes(y=Raw_OR),colour='#3591d1')
+    p<-p+theme(legend.title=element_blank())
+    p<-p+ggtitle(paste0('Odds ratio from raw data'))
+    p<-p+xlab("PT")+ylab('Odds ratio')
+  }
+  p<-p + theme(axis.title.x = element_text(size=13)) + theme(axis.title.y = element_text(size=13))
+  p<-p + theme(plot.title = element_text(size=15, hjust=0.5))
+  p<-p + theme(axis.text.x=element_text(size=15)) + theme(axis.text.y=element_text(size=15))
+  return(p)
 }
