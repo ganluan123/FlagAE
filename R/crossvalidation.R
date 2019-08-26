@@ -69,12 +69,12 @@
 #'
 #' # Bayesian model with Ising prior
 #' RHO<-rep(1,dim(AEdata)[1])
-#' ISINGRAW<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha=0.5, beta=0.75, alpha.t=0.5, beta.t=0.75,
+#' ISINGRAW<-Ising_history(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5, beta_=0.75, alpha.t=0.5, beta.t=0.75,
 #'                                    alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 #' ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 #' loss_2<-Lossfun(aedata=AEdata, PI=ISINGPI)
 #'
-#' LOSSISING<-CVising(AElist=AELIST, n_burn=100, n_iter=500, thin=20, alpha=0.5, beta=0.75, alpha.t=0.5, beta.t=0.75,
+#' LOSSISING<-CVising(AElist=AELIST, n_burn=100, n_iter=500, thin=20, alpha_=0.5, beta_=0.75, alpha.t=0.5, beta.t=0.75,
 #'                              alpha.c=0.25, beta.c=0.75, rho=RHO, theta=0.02)
 #' LOSSISING$trainloss # train loss
 #' LOSSISING$testloss # test loss

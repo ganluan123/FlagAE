@@ -93,7 +93,7 @@
 #' ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 #'
 #' Isingplot(ISINGDATA)
-#' Isingplot(ISINGDATA, ptnum=15, param="odds ratio", OR_ylim=c(1,10))
+#' Isingplot(ISINGDATA, ptnum=15, param="odds ratio", OR_xlim=c(1,10))
 #' ISINGTABLE<-Isingtable(ISINGDATA)
 #' ISINGTABLE2<-Isingtable(ISINGDATA, ptnum=15, param="odds ratio")
 #'

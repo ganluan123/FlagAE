@@ -134,7 +134,7 @@ ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5,
 ISINGPI<-Isinggetpi(aedata = AEdata, isingraw=ISINGRAW)
 
 Isingplot(ISINGDATA)
-Isingplot(ISINGDATA, ptnum=15, param="odds ratio", OR_ylim=c(1,10))
+Isingplot(ISINGDATA, ptnum=15, param="odds ratio", OR_xlim=c(1,10))
 ISINGTABLE<-Isingtable(ISINGDATA)
 ISINGTABLE2<-Isingtable(ISINGDATA, ptnum=15, param="odds ratio")
 

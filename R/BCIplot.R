@@ -3,7 +3,7 @@
 
 #' @name BCIplot
 #'
-#' @title Plot based on Fisher exact test
+#' @title Plot based on Binomial confidence interval
 #'
 #' @description Both functions \code{BCIplot} plot the top AEs with
 #' top ptnum (one parameter, an integer) highest difference of incidence rate

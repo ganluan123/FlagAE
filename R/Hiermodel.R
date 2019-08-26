@@ -105,7 +105,7 @@
 #'
 #' Compareplot(HIERDATA)
 #' # user can use a very big number(bigger than total PTs in dataset) to plot out all the PTs
-#' COmpareplot(HIERDATA, ptnum=5000, param='odds ratio')
+#' Compareplot(HIERDATA, ptnum=5000, param='odds ratio')
 #' }
 #'
 #' @seealso

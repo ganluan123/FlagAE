@@ -49,6 +49,7 @@
 #'
 #' @note
 #' Make sure that adsl and adae contain the required columns with exact the same column names as listed in "parameters" section.
+#'
 #' @export
 preprocess<-function(adsl, adae){
   ### this function will take 2 parameters
