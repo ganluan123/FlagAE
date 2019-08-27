@@ -9,8 +9,7 @@
 HIplot(hierdata, isingdata, aedata, ptnum = 10,
   param = "risk difference", OR_xlim = c(0, 5))
 
-HItable(hierdata, isingdata, aedata, ptnum = 10,
-  param = "risk difference")
+HItable(hierdata, isingdata, ptnum = 10, param = "risk difference")
 }
 \arguments{
 \item{hierdata}{output from function \code{\link{Hier}}}
@@ -59,8 +58,8 @@ ISINGDATA<-Ising(aedata = AEdata, n_burn=1000, n_iter=5000, thin=20, alpha_=0.5,
 HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
 HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio", OR_xlim=c(0,20))
 
-HItable(hierdata=HIERDATA, isingdata=ISINGDATA)
-HItable(hierdata=HIERDATA, isingdata=ISINGDATA, ptnum=15, param="odds ratio")
+HItable(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
+HItable(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio")
 }
 
 }

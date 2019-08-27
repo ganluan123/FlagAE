@@ -3,7 +3,7 @@
 \name{BCIplot}
 \alias{BCIplot}
 \alias{BCItable}
-\title{Plot based on Fisher exact test}
+\title{Plot based on Binomial confidence interval}
 \usage{
 BCIplot(aedata, ptnum = 10, conf.level = 0.95)
 

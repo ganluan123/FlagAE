@@ -45,8 +45,8 @@
 #' HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
 #' HIplot(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio", OR_xlim=c(0,20))
 #'
-#' HItable(hierdata=HIERDATA, isingdata=ISINGDATA)
-#' HItable(hierdata=HIERDATA, isingdata=ISINGDATA, ptnum=15, param="odds ratio")
+#' HItable(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata)
+#' HItable(hierdata=HIERDATA, isingdata=ISINGDATA, aedata=AEdata, ptnum=15, param="odds ratio")
 #' }
 #'
 
@@ -102,15 +102,23 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     # 0 for PT in union, 1 for PT unique in Hierarchical model
     # 2 for PT in Ising model
     test_Intsect<-inputdata[which(inputdata$PT %in% PT_Intsect),]
-    test_Intsect$Ind<-"A"
-    test_Intsect$Set<-"Both models"
+    if (dim(test_Intsect)[1]>0){
+      test_Intsect$Ind<-"A"
+      test_Intsect$Set<-"Intersect of both models"
+    }
+    
     test_Hier_Uni<-inputdata[which(inputdata$PT %in% PT_Hier_Uni),]
-    test_Hier_Uni$Ind<-"B"
-    test_Hier_Uni$Set<-"Hierarchical Model"
+    if (dim(test_Hier_Uni)[1]>0){
+      test_Hier_Uni$Ind<-"B"
+      test_Hier_Uni$Set<-"Unique in Hierarchical Model"
+    }
+    
     test_Is_Uni<-inputdata[which(inputdata$PT %in% PT_Is_Uni),]
-    test_Is_Uni$Ind<-"C"
-    test_Is_Uni$Set<-"Ising prior model"
-
+    if (dim(test_Is_Uni)[1]>0){
+      test_Is_Uni$Ind<-"C"
+      test_Is_Uni$Set<-"Unique in Ising prior"
+    }
+    
     # combine the dataset together
     test<-rbind(test_Intsect, test_Hier_Uni)
     test<-rbind(test, test_Is_Uni)
@@ -209,14 +217,22 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
     # 0 for PT in union, 1 for PT unique in Hierarchical model
     # 2 for PT in Ising model
     test_Intsect<-inputdata[which(inputdata$PT %in% PT_Intsect),]
-    test_Intsect$Ind<-"A"
-    test_Intsect$Set<-"Intersect of both models"
+    if (dim(test_Intsect)[1]>0){
+      test_Intsect$Ind<-"A"
+      test_Intsect$Set<-"Intersect of both models"
+    }
+    
     test_Hier_Uni<-inputdata[which(inputdata$PT %in% PT_Hier_Uni),]
-    test_Hier_Uni$Ind<-"B"
-    test_Hier_Uni$Set<-"Unique in Hierarchical Model"
+    if (dim(test_Hier_Uni)[1]>0){
+      test_Hier_Uni$Ind<-"B"
+      test_Hier_Uni$Set<-"Unique in Hierarchical Model"
+    }
+    
     test_Is_Uni<-inputdata[which(inputdata$PT %in% PT_Is_Uni),]
-    test_Is_Uni$Ind<-"C"
-    test_Is_Uni$Set<-"Unique in Ising prior"
+    if (dim(test_Is_Uni)[1]>0){
+      test_Is_Uni$Ind<-"C"
+      test_Is_Uni$Set<-"Unique in Ising prior"
+    }
 
     # combine the dataset together
     test<-rbind(test_Intsect, test_Hier_Uni)
@@ -300,10 +316,9 @@ HIplot<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference", 
 #' @rdname HierIsingplot
 #'
 #' @export
-HItable<-function(hierdata,isingdata, aedata, ptnum=10, param="risk difference" ){
+HItable<-function(hierdata,isingdata, ptnum=10, param="risk difference" ){
   # hierdata is the result from function Hier
   # isingdata is the result from function Ising
-  # aedata is the result from function preprocess
   # ptnum is the number of AE we want to show
   # param is the summary statistic we use to select the AE, it can be either "risk difference" or "odds ratio"
   # for this function, it will first select the top ptnum number of AE based on the summary statistic param from the selected method
