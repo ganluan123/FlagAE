@@ -1,4 +1,4 @@
-#' FlagAE: A package for flagging adverse events by Bayesian methods.
+#' FlagAE: A package for flagging adverse events by Bayesian methods
 #'
 #' @details This packages can flag adverse events by three stage Bayesian Hierarchical model (see \code{\link{Hier}}) and by
 #' Bayesian model with Ising latent variable (see \code{\link{Ising}}). It also provide the option to flag adverase events by
