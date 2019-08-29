@@ -47,6 +47,8 @@
 #' BCItable(aedata=AEdata)
 #' BCItable(aedata=AEdata, ptnum=15, conf.level=0.9)
 #' }
+#'
+#'
 #' @seealso \code{\link{preprocess}}
 #'
 #' @export
